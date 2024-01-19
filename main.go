@@ -1,7 +1,7 @@
 package main
 
 import (
-	_ "sga_mid_proyecto_curricular/routers"
+	_ "github.com/udistrital/sga_mid_proyecto_curricular/routers"
 
 	apistatus "github.com/udistrital/utils_oas/apiStatusLib"
 
