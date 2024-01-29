@@ -3,10 +3,11 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/astaxie/beego"
-	"github.com/udistrital/utils_oas/request"
-	"sga_mid_proyecto_curricular/models"
 	"strings"
+
+	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/logs"
+	"github.com/udistrital/utils_oas/request"
 )
 
 type ConsultaProyectoAcademicoController struct {
@@ -31,12 +32,10 @@ func (c *ConsultaProyectoAcademicoController) URLMapping() {
 // @Param	limit	query	string	false	"Limit the size of result set. Must be an integer"
 // @Param	offset	query	string	false	"Start position of result set. Must be an integer"
 // @Success 200 {object} models.ConsultaProyectoAcademico
-// @Failure 403
+// @Failure 404 not found resource
 // @router / [get]
 func (c *ConsultaProyectoAcademicoController) GetAll() {
 	var resultado map[string]interface{}
-	var alerta models.Alert
-	alertas := append([]interface{}{"Response:"})
 
 	if resultado["Type"] != "error" {
 		var proyectos []map[string]interface{}
@@ -95,25 +94,22 @@ func (c *ConsultaProyectoAcademicoController) GetAll() {
 
 			}
 
-			c.Data["json"] = proyectos
+			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": proyectos}
 
 		} else {
-			alertas = append(alertas, errproyecto.Error())
-			alerta.Code = "400"
-			alerta.Type = "error"
-			alerta.Body = alertas
-			c.Data["json"] = alerta
+			logs.Error(errproyecto)
+			c.Data["message"] = "Error service GETALL: " + errproyecto.Error()
+			c.Abort("404")
 		}
 
 	} else {
-		if resultado["Body"] == "<QuerySeter> no row found" {
+		errorMessage := resultado["Body"].(string)
+		if errorMessage == "<QuerySeter> no row found" {
 			c.Data["json"] = nil
 		} else {
-			alertas = append(alertas, resultado["Body"])
-			alerta.Code = "400"
-			alerta.Type = "error"
-			alerta.Body = alertas
-			c.Data["json"] = alerta
+			logs.Error(resultado)
+			c.Data["message"] = "Error service GETALL: " + errorMessage
+			c.Abort("404")
 		}
 	}
 	c.ServeJSON()
@@ -124,12 +120,10 @@ func (c *ConsultaProyectoAcademicoController) GetAll() {
 // @Description get ConsultaProyectoAcademico by id
 // @Param	id		path 	string	true		"The key for staticblock"
 // @Success 200 {object} models.ConsultaProyectoAcademico
-// @Failure 403 :id is empty
+// @Failure 404 not found resource
 // @router /:id [get]
 func (c *ConsultaProyectoAcademicoController) GetOnePorId() {
 	var resultado map[string]interface{}
-	var alerta models.Alert
-	alertas := append([]interface{}{"Response:"})
 	idStr := c.Ctx.Input.Param(":id")
 
 	if resultado["Type"] != "error" {
@@ -231,28 +225,34 @@ func (c *ConsultaProyectoAcademicoController) GetOnePorId() {
 
 				}
 
-				c.Data["json"] = proyectos
+				c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": proyectos}
 
 			} else {
-				alertas = append(alertas, errproyecto.Error())
-				alerta.Code = "400"
-				alerta.Type = "error"
-				alerta.Body = alertas
-				c.Data["json"] = alerta
+				if errproyecto != nil || errunidad != nil {
+					errorMessage := "Error in GetOnePorId: "
+					if errproyecto != nil {
+						errorMessage += "Proyecto Academico: " + errproyecto.Error() + "; "
+					}
+					if errunidad != nil {
+						errorMessage += "Unidad Tiempo: " + errunidad.Error() + "; "
+					}
+					logs.Error(errorMessage)
+					c.Data["message"] = errorMessage
+					c.Abort("404")
+				}
 			}
 
 		} else {
-			c.Data["json"] = proyectos
+			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": proyectos}
 		}
 	} else {
-		if resultado["Body"] == "<QuerySeter> no row found" {
+		errorMessage := resultado["Body"].(string)
+		if errorMessage == "<QuerySeter> no row found" {
 			c.Data["json"] = nil
 		} else {
-			alertas = append(alertas, resultado["Body"])
-			alerta.Code = "400"
-			alerta.Type = "error"
-			alerta.Body = alertas
-			c.Data["json"] = alerta
+			logs.Error(resultado)
+			c.Data["message"] = "Error service GetOnePorId: " + errorMessage
+			c.Abort("404")
 		}
 	}
 	c.ServeJSON()
@@ -264,32 +264,29 @@ func (c *ConsultaProyectoAcademicoController) GetOnePorId() {
 // @Param	id		path 	string	true		"el id del proyecto a inhabilitar"
 // @Param   body        body    {}  true        "body Inhabilitar Proyecto content"
 // @Success 200 {}
-// @Failure 403 :id is empty
+// @Failure 400 the request contains incorrect syntax
 // @router /inhabilitar_proyecto/:id [put]
 func (c *ConsultaProyectoAcademicoController) PutInhabilitarProyecto() {
 	idStr := c.Ctx.Input.Param(":id")
 	var ProyectoAcademico map[string]interface{}
-	var alerta models.Alert
-	alertas := append([]interface{}{"Response:"})
+
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &ProyectoAcademico); err == nil {
 
 		var resultadoProyecto map[string]interface{}
 		errProyecto := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/proyecto_academico_institucion/"+idStr, "PUT", &resultadoProyecto, ProyectoAcademico)
 		if resultadoProyecto["Type"] == "error" || errProyecto != nil || resultadoProyecto["Status"] == "404" || resultadoProyecto["Message"] != nil {
-			alertas = append(alertas, resultadoProyecto)
-			alerta.Type = "error"
-			alerta.Code = "400"
+			logs.Error(resultadoProyecto)
+			c.Data["message"] = "Error service PutInhabilitarProyecto: " + resultadoProyecto["Body"].(string)
+			c.Abort("404")
 		} else {
-			alertas = append(alertas, ProyectoAcademico)
+			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": ProyectoAcademico}
 		}
 
 	} else {
-		alerta.Type = "error"
-		alerta.Code = "400"
-		alertas = append(alertas, err.Error())
+		logs.Error(err)
+		c.Data["message"] = "Error service PutInhabilitarProyecto: " + err.Error()
+		c.Abort("404")
 	}
-	alerta.Body = alertas
-	c.Data["json"] = alerta
 	c.ServeJSON()
 }
 
@@ -302,8 +299,6 @@ func (c *ConsultaProyectoAcademicoController) PutInhabilitarProyecto() {
 // @router /get_registro/:id [get]
 func (c *ConsultaProyectoAcademicoController) GetOneRegistroPorId() {
 	var resultado map[string]interface{}
-	var alerta models.Alert
-	alertas := append([]interface{}{"Response:"})
 	idStr := c.Ctx.Input.Param(":id")
 
 	if resultado["Type"] != "error" {
@@ -326,25 +321,22 @@ func (c *ConsultaProyectoAcademicoController) GetOneRegistroPorId() {
 				}
 			}
 
-			c.Data["json"] = registros
+			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": registros}
 
 		} else {
-			alertas = append(alertas, errproyecto.Error())
-			alerta.Code = "400"
-			alerta.Type = "error"
-			alerta.Body = alertas
-			c.Data["json"] = alerta
+			logs.Error(errproyecto)
+			c.Data["message"] = "Error service GetOneRegistroPorId: " + errproyecto.Error()
+			c.Abort("404")
 		}
 
 	} else {
-		if resultado["Body"] == "<QuerySeter> no row found" {
+		errorMessage := resultado["Body"].(string)
+		if errorMessage == "<QuerySeter> no row found" {
 			c.Data["json"] = nil
 		} else {
-			alertas = append(alertas, resultado["Body"])
-			alerta.Code = "400"
-			alerta.Type = "error"
-			alerta.Body = alertas
-			c.Data["json"] = alerta
+			logs.Error(resultado)
+			c.Data["message"] = "Error service GetOneRegistroPorId: " + errorMessage
+			c.Abort("404")
 		}
 	}
 	c.ServeJSON()
