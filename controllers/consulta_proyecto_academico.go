@@ -3,10 +3,12 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/astaxie/beego"
-	"github.com/udistrital/utils_oas/request"
-	"sga_mid_proyecto_curricular/models"
 	"strings"
+
+	"github.com/astaxie/beego"
+	"github.com/udistrital/sga_mid_proyecto_curricular/models"
+	"github.com/udistrital/sga_mid_proyecto_curricular/services"
+	"github.com/udistrital/utils_oas/request"
 )
 
 type ConsultaProyectoAcademicoController struct {
@@ -40,79 +42,21 @@ func (c *ConsultaProyectoAcademicoController) GetAll() {
 
 	if resultado["Type"] != "error" {
 		var proyectos []map[string]interface{}
-
 		errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico/", &proyectos)
-		// errdependencia := request.GetJson("http://"+beego.AppConfig.String("OikosService")+"/dependencia_tipo_dependencia/?query=TipoDependenciaId:2", &dependencias)
 
-		// if errproyecto == nil && errdependencia == nil {
 		if errproyecto == nil {
-			for _, proyecto := range proyectos {
-				registros := proyecto["Registro"].([]interface{})
-				proyectobase := proyecto["ProyectoAcademico"].(map[string]interface{})
-				proyecto["FechaVenimientoAcreditacion"] = nil
-				proyecto["FechaVenimientoCalidad"] = nil
-
-				// errdependencia := request.GetJson("http://"+beego.AppConfig.String("OikosService")+"/dependencia_tipo_dependencia/?query=TipoDependenciaId:2", &dependencia)
-				/*
-						for _, dependencia := range dependencias {
-						dependenciaTemp := dependencia["DependenciaId"].(map[string]interface{})
-						idOikos = dependenciaTemp["Id"].(float64)
-						if proyectobase["DependenciaId"].(float64) == idOikos {
-							proyecto["NombreDependencia"] = dependenciaTemp["Nombre"]
-						}
-					}
-				*/
-
-				// Información de la facultad
-				var dependencia map[string]interface{}
-				errdependencia := request.GetJson("http://"+beego.AppConfig.String("OikosService")+"/dependencia/"+fmt.Sprintf("%.f", proyectobase["FacultadId"].(float64)), &dependencia)
-				// if errdependencia["Type"] == "error" || errdependencia != nil || dependencia["Status"] == "404" || dependencia["Message"] != nil {
-				if errdependencia == nil {
-					// idOikos := dependencia["Id"].(float64)
-					proyecto["NombreFacultad"] = dependencia["Nombre"]
-				}
-
-				if proyectobase["Oferta"] == true {
-					proyecto["OfertaLetra"] = "Si"
-				} else if proyectobase["Oferta"] == false {
-					proyecto["OfertaLetra"] = "No"
-				}
-
-				for _, registrotemp := range registros {
-					registro := registrotemp.(map[string]interface{})
-					tiporegistro := registro["TipoRegistroId"].(map[string]interface{})
-
-					if tiporegistro["Id"].(float64) == 1 && registro["Activo"] == true {
-						proyecto["FechaVenimientoAcreditacion"] = registro["VencimientoActoAdministrativo"]
-						proyecto["FechaVenimientoCalidad"] = nil
-						if tiporegistro["Id"].(float64) == 2 && registro["Activo"] == true {
-							proyecto["FechaVenimientoCalidad"] = registro["VencimientoActoAdministrativo"]
-						}
-					} else if tiporegistro["Id"].(float64) == 2 && registro["Activo"] == true {
-						proyecto["FechaVenimientoCalidad"] = registro["VencimientoActoAdministrativo"]
-					}
-				}
-
-			}
+			services.ManejoProyectos(&proyectos)
 
 			c.Data["json"] = proyectos
-
 		} else {
-			alertas = append(alertas, errproyecto.Error())
-			alerta.Code = "400"
-			alerta.Type = "error"
-			alerta.Body = alertas
+			services.ManejoError(&alerta, &alertas, "", errproyecto)
 			c.Data["json"] = alerta
 		}
-
 	} else {
 		if resultado["Body"] == "<QuerySeter> no row found" {
 			c.Data["json"] = nil
 		} else {
-			alertas = append(alertas, resultado["Body"])
-			alerta.Code = "400"
-			alerta.Type = "error"
-			alerta.Body = alertas
+			services.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultado["Body"]))
 			c.Data["json"] = alerta
 		}
 	}
@@ -139,6 +83,9 @@ func (c *ConsultaProyectoAcademicoController) GetOnePorId() {
 		// var dependencias []map[string]interface{}
 		var unidades []map[string]interface{}
 
+		//errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico/"+idStr, &proyectos)
+		fmt.Println("URL", "http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico/"+idStr)
+		fmt.Println("VARIABLE", beego.AppConfig.String("ProyectoAcademicoService"))
 		errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico/"+idStr, &proyectos)
 		// errdependencia := request.GetJson("http://"+beego.AppConfig.String("OikosService")+"/dependencia_tipo_dependencia/?query=TipoDependenciaId:2", &dependencias)
 		errunidad := request.GetJson("http://"+beego.AppConfig.String("CoreService")+"/unidad_tiempo/", &unidades)
