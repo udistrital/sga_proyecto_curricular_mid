@@ -135,6 +135,18 @@ func ManejoProyectosGetOneId(proyectos *[]map[string]interface{}, unidades []map
 	}
 }
 
+// FUNCIONES QUE SE USAN EN PUT INHABILITAR PROYECTO
+
+func InhabilitarProyecto(alerta *models.Alert, alertas *[]interface{}, idStr string, ProyectoAcademico map[string]interface{}) {
+	var resultadoProyecto map[string]interface{}
+	errProyecto := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/proyecto_academico_institucion/"+idStr, "PUT", &resultadoProyecto, ProyectoAcademico)
+	if resultadoProyecto["Type"] == "error" || errProyecto != nil || resultadoProyecto["Status"] == "404" || resultadoProyecto["Message"] != nil {
+		ManejoError(alerta, alertas, fmt.Sprintf("%v", resultadoProyecto))
+	} else {
+		*alertas = append(*alertas, ProyectoAcademico)
+	}
+}
+
 func ManejoError(alerta *models.Alert, alertas *[]interface{}, mensaje string, err ...error) {
 	var msj string
 	if len(err) > 0 && err[0] != nil {

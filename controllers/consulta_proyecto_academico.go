@@ -124,23 +124,20 @@ func (c *ConsultaProyectoAcademicoController) PutInhabilitarProyecto() {
 	var alerta models.Alert
 	alertas := append([]interface{}{"Response:"})
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &ProyectoAcademico); err == nil {
-
-		var resultadoProyecto map[string]interface{}
+		services.InhabilitarProyecto(&alerta, &alertas, idStr, ProyectoAcademico)
+		/*var resultadoProyecto map[string]interface{}
 		errProyecto := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/proyecto_academico_institucion/"+idStr, "PUT", &resultadoProyecto, ProyectoAcademico)
 		if resultadoProyecto["Type"] == "error" || errProyecto != nil || resultadoProyecto["Status"] == "404" || resultadoProyecto["Message"] != nil {
 			alertas = append(alertas, resultadoProyecto)
 			alerta.Type = "error"
 			alerta.Code = "400"
+			alerta.Body = alertas
 		} else {
 			alertas = append(alertas, ProyectoAcademico)
-		}
-
+		}*/
 	} else {
-		alerta.Type = "error"
-		alerta.Code = "400"
-		alertas = append(alertas, err.Error())
+		services.ManejoError(&alerta, &alertas, "", err)
 	}
-	alerta.Body = alertas
 	c.Data["json"] = alerta
 	c.ServeJSON()
 }
