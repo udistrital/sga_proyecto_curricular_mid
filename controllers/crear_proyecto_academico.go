@@ -3,11 +3,12 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/astaxie/beego"
+	"github.com/udistrital/sga_mid_proyecto_curricular/helpers"
+	"github.com/udistrital/sga_mid_proyecto_curricular/models"
+	"github.com/udistrital/sga_mid_proyecto_curricular/services"
 	"github.com/udistrital/utils_oas/request"
-	"github.com/udistrital/utils_oas/time_bogota"
-	"sga_mid_proyecto_curricular/models"
-	"strconv"
 )
 
 type CrearProyectoAcademicoController struct {
@@ -108,8 +109,9 @@ func (c *CrearProyectoAcademicoController) PostCoordinadorById() {
 			errcordinador := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/proyecto_academico_rol_tercero_dependencia/?query=ProyectoAcademicoInstitucionId.Id:"+idStr, &CoordinadorAntiguos)
 			if errcordinador == nil {
 				if CoordinadorAntiguos[0]["Id"] != nil {
-
-					for _, cordinadorFecha := range CoordinadorAntiguos {
+					services.ManejoCoordinadorAntiguo(&alertas, &alerta, CoordinadorAntiguos)
+					services.RegistrarCoordinador(&alertas, &alerta, CoordinadorNuevo)
+					/*for _, cordinadorFecha := range CoordinadorAntiguos {
 						if cordinadorFecha["Activo"] == true {
 							cordinadorFecha["Activo"] = false
 							coordinador_cambiado := cordinadorFecha
@@ -122,30 +124,32 @@ func (c *CrearProyectoAcademicoController) PostCoordinadorById() {
 								alertas = append(alertas, resultado)
 								alerta.Type = "error"
 								alerta.Code = "400"
+								alerta.Body = alertas
 							}
 						} else {
 							fmt.Println("Todos los registros estan nulos")
 						}
 
-					}
+					}*/
 
-					var resultadoCoordinadorNuevo map[string]interface{}
+					/*var resultadoCoordinadorNuevo map[string]interface{}
 					CoordinadorNuevo["FechaFinalizacion"] = "0001-01-01T00:00:00-05:00"
 					errRegistro := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/proyecto_academico_rol_tercero_dependencia", "POST", &resultadoCoordinadorNuevo, CoordinadorNuevo)
 					if resultadoCoordinadorNuevo["Type"] == "error" || errRegistro != nil || resultadoCoordinadorNuevo["Status"] == "404" || resultadoCoordinadorNuevo["Message"] != nil {
 						alertas = append(alertas, resultadoCoordinadorNuevo)
 						alerta.Type = "error"
 						alerta.Code = "400"
+						alerta.Body = alertas
 					} else {
 						alertas = append(alertas, CoordinadorNuevo)
-					}
-
-					alerta.Body = alertas
+					}*/
+					//alerta.Body = alertas
 					c.Data["json"] = alerta
 					c.ServeJSON()
 				} else {
 					if err := json.Unmarshal(c.Ctx.Input.RequestBody, &CoordinadorNuevo); err == nil {
-						var resultadoCoordinadorNuevo map[string]interface{}
+						services.RegistrarCoordinador(&alertas, &alerta, CoordinadorNuevo)
+						/*var resultadoCoordinadorNuevo map[string]interface{}
 						CoordinadorNuevo["FechaFinalizacion"] = "0001-01-01T00:00:00-05:00"
 
 						errRegistro := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/proyecto_academico_rol_tercero_dependencia", "POST", &resultadoCoordinadorNuevo, CoordinadorNuevo)
@@ -153,42 +157,30 @@ func (c *CrearProyectoAcademicoController) PostCoordinadorById() {
 							alertas = append(alertas, resultadoCoordinadorNuevo)
 							alerta.Type = "error"
 							alerta.Code = "400"
+							alerta.Body = alertas
 						} else {
 							alertas = append(alertas, CoordinadorNuevo)
-						}
-
+						}*/
 					} else {
-						alerta.Type = "error"
-						alerta.Code = "400"
-						alertas = append(alertas, err.Error())
+						helpers.ManejoError(&alerta, &alertas, "", err)
 					}
-
 				}
 			} else {
-				alertas = append(alertas, errcordinador.Error())
-				alerta.Code = "400"
-				alerta.Type = "error"
-				alerta.Body = alertas
+				helpers.ManejoError(&alerta, &alertas, "", errcordinador)
 				c.Data["json"] = alerta
 			}
 		} else {
 			if resultado["Body"] == "<QuerySeter> no row found" {
 				c.Data["json"] = nil
 			} else {
-				alertas = append(alertas, resultado["Body"])
-				alerta.Code = "400"
-				alerta.Type = "error"
-				alerta.Body = alertas
+				helpers.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultado["Body"]))
 				c.Data["json"] = alerta
 			}
 		}
 	} else {
-		alerta.Type = "error"
-		alerta.Code = "400"
-		alertas = append(alertas, err.Error())
+		helpers.ManejoError(&alerta, &alertas, "", err)
 	}
-
-	alerta.Body = alertas
+	//alerta.Body = alertas
 	c.Data["json"] = alerta
 	c.ServeJSON()
 }

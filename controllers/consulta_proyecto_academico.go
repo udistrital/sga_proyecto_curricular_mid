@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/astaxie/beego"
+	"github.com/udistrital/sga_mid_proyecto_curricular/helpers"
 	"github.com/udistrital/sga_mid_proyecto_curricular/models"
 	"github.com/udistrital/sga_mid_proyecto_curricular/services"
 	"github.com/udistrital/utils_oas/request"
@@ -48,14 +49,14 @@ func (c *ConsultaProyectoAcademicoController) GetAll() {
 
 			c.Data["json"] = proyectos
 		} else {
-			services.ManejoError(&alerta, &alertas, "", errproyecto)
+			helpers.ManejoError(&alerta, &alertas, "", errproyecto)
 			c.Data["json"] = alerta
 		}
 	} else {
 		if resultado["Body"] == "<QuerySeter> no row found" {
 			c.Data["json"] = nil
 		} else {
-			services.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultado["Body"]))
+			helpers.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultado["Body"]))
 			c.Data["json"] = alerta
 		}
 	}
@@ -92,7 +93,7 @@ func (c *ConsultaProyectoAcademicoController) GetOnePorId() {
 				services.ManejoProyectosGetOneId(&proyectos, unidades, idUnidad)
 				c.Data["json"] = proyectos
 			} else {
-				services.ManejoError(&alerta, &alertas, "", errproyecto)
+				helpers.ManejoError(&alerta, &alertas, "", errproyecto)
 				c.Data["json"] = alerta
 			}
 		} else {
@@ -102,7 +103,7 @@ func (c *ConsultaProyectoAcademicoController) GetOnePorId() {
 		if resultado["Body"] == "<QuerySeter> no row found" {
 			c.Data["json"] = nil
 		} else {
-			services.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultado["Body"]))
+			helpers.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultado["Body"]))
 			c.Data["json"] = alerta
 		}
 	}
@@ -135,7 +136,7 @@ func (c *ConsultaProyectoAcademicoController) PutInhabilitarProyecto() {
 			alertas = append(alertas, ProyectoAcademico)
 		}*/
 	} else {
-		services.ManejoError(&alerta, &alertas, "", err)
+		helpers.ManejoError(&alerta, &alertas, "", err)
 	}
 	c.Data["json"] = alerta
 	c.ServeJSON()
@@ -176,14 +177,14 @@ func (c *ConsultaProyectoAcademicoController) GetOneRegistroPorId() {
 			}*/
 			c.Data["json"] = registros
 		} else {
-			services.ManejoError(&alerta, &alertas, "", errproyecto)
+			helpers.ManejoError(&alerta, &alertas, "", errproyecto)
 			c.Data["json"] = alerta
 		}
 	} else {
 		if resultado["Body"] == "<QuerySeter> no row found" {
 			c.Data["json"] = nil
 		} else {
-			services.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultado["Body"]))
+			helpers.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultado["Body"]))
 			c.Data["json"] = alerta
 		}
 	}
