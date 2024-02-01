@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/astaxie/beego"
 	"github.com/udistrital/sga_mid_proyecto_curricular/models"
@@ -144,6 +145,24 @@ func InhabilitarProyecto(alerta *models.Alert, alertas *[]interface{}, idStr str
 		ManejoError(alerta, alertas, fmt.Sprintf("%v", resultadoProyecto))
 	} else {
 		*alertas = append(*alertas, ProyectoAcademico)
+	}
+}
+
+// FUNCIONES QUE SE USAN EN PUT GET ONE REGISTRO POR ID
+
+func ManejoRegistrosGetRegistroId(registros *[]map[string]interface{}) {
+	if (*registros)[0]["Id"] != nil {
+		for _, registro := range *registros {
+			vigenciatemporal := registro["VigenciaActoAdministrativo"].(string)
+			vigenciatemporal = strings.Replace(vigenciatemporal, "A", " A", 1)
+			registro["VigenciaActoAdministrativo"] = vigenciatemporal
+			if registro["Activo"] == true {
+				registro["ActivoLetra"] = "Si"
+
+			} else if registro["Activo"] == false {
+				registro["ActivoLetra"] = "No"
+			}
+		}
 	}
 }
 

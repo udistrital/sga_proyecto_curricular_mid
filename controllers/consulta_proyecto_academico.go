@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/astaxie/beego"
 	"github.com/udistrital/sga_mid_proyecto_curricular/models"
@@ -161,7 +160,8 @@ func (c *ConsultaProyectoAcademicoController) GetOneRegistroPorId() {
 		errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/registro_calificado_acreditacion/?query=ProyectoAcademicoInstitucionId.Id:"+idStr, &registros)
 
 		if errproyecto == nil {
-			if registros[0]["Id"] != nil {
+			services.ManejoRegistrosGetRegistroId(&registros)
+			/*if registros[0]["Id"] != nil {
 				for _, registro := range registros {
 					vigenciatemporal := registro["VigenciaActoAdministrativo"].(string)
 					vigenciatemporal = strings.Replace(vigenciatemporal, "A", " A", 1)
@@ -173,26 +173,17 @@ func (c *ConsultaProyectoAcademicoController) GetOneRegistroPorId() {
 						registro["ActivoLetra"] = "No"
 					}
 				}
-			}
-
+			}*/
 			c.Data["json"] = registros
-
 		} else {
-			alertas = append(alertas, errproyecto.Error())
-			alerta.Code = "400"
-			alerta.Type = "error"
-			alerta.Body = alertas
+			services.ManejoError(&alerta, &alertas, "", errproyecto)
 			c.Data["json"] = alerta
 		}
-
 	} else {
 		if resultado["Body"] == "<QuerySeter> no row found" {
 			c.Data["json"] = nil
 		} else {
-			alertas = append(alertas, resultado["Body"])
-			alerta.Code = "400"
-			alerta.Type = "error"
-			alerta.Body = alertas
+			services.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultado["Body"]))
 			c.Data["json"] = alerta
 		}
 	}
