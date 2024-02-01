@@ -45,7 +45,7 @@ func (c *ConsultaProyectoAcademicoController) GetAll() {
 		errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico/", &proyectos)
 
 		if errproyecto == nil {
-			services.ManejoProyectos(&proyectos)
+			services.ManejoProyectosGetAll(&proyectos)
 
 			c.Data["json"] = proyectos
 		} else {
@@ -83,111 +83,19 @@ func (c *ConsultaProyectoAcademicoController) GetOnePorId() {
 		// var dependencias []map[string]interface{}
 		var unidades []map[string]interface{}
 
-		//errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico/"+idStr, &proyectos)
-		fmt.Println("URL", "http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico/"+idStr)
-		fmt.Println("VARIABLE", beego.AppConfig.String("ProyectoAcademicoService"))
 		errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico/"+idStr, &proyectos)
 		// errdependencia := request.GetJson("http://"+beego.AppConfig.String("OikosService")+"/dependencia_tipo_dependencia/?query=TipoDependenciaId:2", &dependencias)
 		errunidad := request.GetJson("http://"+beego.AppConfig.String("CoreService")+"/unidad_tiempo/", &unidades)
 
 		if proyectos[0]["ProyectoAcademico"] != nil {
-
 			// if errproyecto == nil && errdependencia == nil && errunidad == nil {
 			if errproyecto == nil && errunidad == nil {
-
-				for _, proyecto := range proyectos {
-					registros := proyecto["Registro"].([]interface{})
-					proyectobase := proyecto["ProyectoAcademico"].(map[string]interface{})
-					proyecto["FechaVenimientoAcreditacion"] = nil
-					proyecto["FechaVenimientoCalidad"] = nil
-					proyecto["TieneRegistroAltaCalidad"] = false
-					proyecto["NumeroActoAdministrativoAltaCalidad"] = nil
-					proyecto["AnoActoAdministrativoIdAltaCalidad"] = nil
-					proyecto["FechaCreacionActoAdministrativoAltaCalidad"] = nil
-					proyecto["VigenciaActoAdministrativoAltaCalidad"] = nil
-					proyecto["EnlaceActoAdministrativoAltaCalidad"] = nil
-
-					/*
-						for _, dependencia := range dependencias {
-							proyectotem := dependencia["DependenciaId"].(map[string]interface{})
-							idOikos = proyectotem["Id"].(float64)
-							if proyectobase["DependenciaId"].(float64) == idOikos {
-								proyecto["NombreDependencia"] = proyectotem["Nombre"]
-								proyecto["IdDependenciaFacultad"] = proyectotem["Id"]
-								proyecto["TelefonoDependencia"] = proyectotem["TelefonoDependencia"]
-							}
-						}
-					*/
-
-					// Información de la facultad
-					var dependenciaFacultad map[string]interface{}
-					errdependenciaFacultad := request.GetJson("http://"+beego.AppConfig.String("OikosService")+"/dependencia/"+fmt.Sprintf("%.f", proyectobase["FacultadId"].(float64)), &dependenciaFacultad)
-					// if errdependencia["Type"] == "error" || errdependencia != nil || dependencia["Status"] == "404" || dependencia["Message"] != nil {
-					if errdependenciaFacultad == nil {
-						proyecto["NombreFacultad"] = dependenciaFacultad["Nombre"]
-						proyecto["IdDependenciaFacultad"] = dependenciaFacultad["Id"]
-					}
-
-					// Información de la dependencia del proyecto
-					var dependencia map[string]interface{}
-					errdependencia := request.GetJson("http://"+beego.AppConfig.String("OikosService")+"/dependencia/"+fmt.Sprintf("%.f", proyectobase["DependenciaId"].(float64)), &dependencia)
-					// if errdependencia["Type"] == "error" || errdependencia != nil || dependencia["Status"] == "404" || dependencia["Message"] != nil {
-					if errdependencia == nil {
-						proyecto["TelefonoDependencia"] = dependencia["TelefonoDependencia"]
-					}
-
-					if proyectobase["Oferta"] == true {
-						proyecto["OfertaLetra"] = "Si"
-					} else if proyectobase["Oferta"] == false {
-						proyecto["OfertaLetra"] = "No"
-					}
-					if proyectobase["CiclosPropedeuticos"] == true {
-						proyecto["CiclosLetra"] = "Si"
-					} else if proyectobase["CiclosPropedeuticos"] == false {
-						proyecto["CiclosLetra"] = "NO"
-					}
-
-					for _, unidad := range unidades {
-						unidadTem := unidad
-						idUnidad = unidadTem["Id"].(float64)
-						if proyectobase["UnidadTiempoId"].(float64) == idUnidad {
-							proyecto["NombreUnidad"] = unidadTem["Nombre"]
-						}
-
-					}
-
-					for _, registrotemp := range registros {
-						registro := registrotemp.(map[string]interface{})
-
-						tiporegistro := registro["TipoRegistroId"].(map[string]interface{})
-
-						if tiporegistro["Id"].(float64) == 1 && registro["Activo"] == true {
-							proyecto["FechaVenimientoAcreditacion"] = registro["VencimientoActoAdministrativo"]
-							proyecto["FechaVenimientoCalidad"] = "00/00/0000"
-						} else if tiporegistro["Id"].(float64) == 2 && registro["Activo"] == true {
-
-							proyecto["FechaVenimientoCalidad"] = registro["VencimientoActoAdministrativo"]
-							proyecto["TieneRegistroAltaCalidad"] = true
-							proyecto["NumeroActoAdministrativoAltaCalidad"] = registro["NumeroActoAdministrativo"]
-							proyecto["AnoActoAdministrativoIdAltaCalidad"] = registro["AnoActoAdministrativoId"]
-							proyecto["FechaCreacionActoAdministrativoAltaCalidad"] = registro["FechaCreacionActoAdministrativo"]
-							proyecto["VigenciaActoAdministrativoAltaCalidad"] = registro["VigenciaActoAdministrativo"]
-							proyecto["EnlaceActoAdministrativoAltaCalidad"] = registro["EnlaceActo"]
-						}
-					}
-
-				}
-
+				services.ManejoProyectosGetOneId(&proyectos, unidades, idUnidad)
 				c.Data["json"] = proyectos
-
 			} else {
-				alertas = append(alertas, errproyecto.Error())
-				alerta.Code = "400"
-				alerta.Type = "error"
-				alerta.Body = alertas
+				services.ManejoError(&alerta, &alertas, "", errproyecto)
 				c.Data["json"] = alerta
 			}
-
 		} else {
 			c.Data["json"] = proyectos
 		}
@@ -195,10 +103,7 @@ func (c *ConsultaProyectoAcademicoController) GetOnePorId() {
 		if resultado["Body"] == "<QuerySeter> no row found" {
 			c.Data["json"] = nil
 		} else {
-			alertas = append(alertas, resultado["Body"])
-			alerta.Code = "400"
-			alerta.Type = "error"
-			alerta.Body = alertas
+			services.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultado["Body"]))
 			c.Data["json"] = alerta
 		}
 	}
