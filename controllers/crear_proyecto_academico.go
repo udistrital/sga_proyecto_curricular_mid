@@ -50,25 +50,19 @@ func (c *CrearProyectoAcademicoController) PostProyecto() {
 
 		errOikos := request.SendJson("http://"+beego.AppConfig.String("OikosService")+"/dependencia_padre/tr_dependencia_padre", "POST", &resultadoOikos, Proyecto_academico_oikosPost)
 		if resultadoOikos["Type"] == "error" || errOikos != nil || resultadoOikos["Status"] == "404" || resultadoOikos["Message"] != nil {
-			alertas = append(alertas, errOikos)
-			alertas = append(alertas, resultadoOikos)
-			alerta.Type = "error"
-			alerta.Code = "400"
-			alerta.Body = alertas
+			helpers.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultadoOikos), errOikos)
 			c.Data["json"] = alerta
 			c.ServeJSON()
 		} else {
-			alertas = append(alertas, Proyecto_academico)
+			services.AsignarProyectoAcademico(&alertas, &Proyecto_academico, resultadoOikos, &Proyecto_academicoPost)
+			/*alertas = append(alertas, Proyecto_academico)
 			idDependenciaProyecto := resultadoOikos["HijaId"].(map[string]interface{})["Id"]
-			Proyecto_academicoPost["ProyectoAcademicoInstitucion"].(map[string]interface{})["DependenciaId"] = idDependenciaProyecto
+			Proyecto_academicoPost["ProyectoAcademicoInstitucion"].(map[string]interface{})["DependenciaId"] = idDependenciaProyecto*/
 		}
 
 		errProyecto := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico", "POST", &resultadoProyecto, Proyecto_academicoPost)
 		if resultadoProyecto["Type"] == "error" || errProyecto != nil || resultadoProyecto["Status"] == "404" || resultadoProyecto["Message"] != nil {
-			alertas = append(alertas, errProyecto)
-			alerta.Type = "error"
-			alerta.Code = "400"
-			alerta.Body = alertas
+			helpers.ManejoError(&alerta, &alertas, "", errProyecto)
 			c.Data["json"] = alerta
 			c.ServeJSON()
 		} else {
@@ -76,12 +70,10 @@ func (c *CrearProyectoAcademicoController) PostProyecto() {
 		}
 
 	} else {
-		alerta.Type = "error"
-		alerta.Code = "400"
-		alertas = append(alertas, err.Error())
+		helpers.ManejoError(&alerta, &alertas, "", err)
 	}
 
-	alerta.Body = alertas
+	//alerta.Body = alertas
 	c.Data["json"] = alerta
 	c.ServeJSON()
 }
