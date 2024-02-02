@@ -8,7 +8,6 @@ import (
 	"github.com/udistrital/sga_mid_proyecto_curricular/helpers"
 	"github.com/udistrital/sga_mid_proyecto_curricular/models"
 	"github.com/udistrital/sga_mid_proyecto_curricular/services"
-	"github.com/udistrital/utils_oas/request"
 )
 
 type ConsultaProyectoAcademicoController struct {
@@ -67,28 +66,7 @@ func (c *ConsultaProyectoAcademicoController) GetOnePorId() {
 	idStr := c.Ctx.Input.Param(":id")
 
 	if resultado["Type"] != "error" {
-		// var idOikos float64
-		var idUnidad float64
-		var proyectos []map[string]interface{}
-		// var dependencias []map[string]interface{}
-		var unidades []map[string]interface{}
-
-		errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico/"+idStr, &proyectos)
-		// errdependencia := request.GetJson("http://"+beego.AppConfig.String("OikosService")+"/dependencia_tipo_dependencia/?query=TipoDependenciaId:2", &dependencias)
-		errunidad := request.GetJson("http://"+beego.AppConfig.String("CoreService")+"/unidad_tiempo/", &unidades)
-
-		if proyectos[0]["ProyectoAcademico"] != nil {
-			// if errproyecto == nil && errdependencia == nil && errunidad == nil {
-			if errproyecto == nil && errunidad == nil {
-				services.ManejoProyectosGetOneId(&proyectos, unidades, idUnidad)
-				c.Data["json"] = proyectos
-			} else {
-				helpers.ManejoError(&alerta, &alertas, "", errproyecto)
-				c.Data["json"] = alerta
-			}
-		} else {
-			c.Data["json"] = proyectos
-		}
+		c.Data["json"] = services.PeticionProyectosGetOneId(idStr, &alerta, &alertas)
 	} else {
 		if resultado["Body"] == "<QuerySeter> no row found" {
 			c.Data["json"] = nil
@@ -115,16 +93,6 @@ func (c *ConsultaProyectoAcademicoController) PutInhabilitarProyecto() {
 	alertas := append([]interface{}{"Response:"})
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &ProyectoAcademico); err == nil {
 		services.InhabilitarProyecto(&alerta, &alertas, idStr, ProyectoAcademico)
-		/*var resultadoProyecto map[string]interface{}
-		errProyecto := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/proyecto_academico_institucion/"+idStr, "PUT", &resultadoProyecto, ProyectoAcademico)
-		if resultadoProyecto["Type"] == "error" || errProyecto != nil || resultadoProyecto["Status"] == "404" || resultadoProyecto["Message"] != nil {
-			alertas = append(alertas, resultadoProyecto)
-			alerta.Type = "error"
-			alerta.Code = "400"
-			alerta.Body = alertas
-		} else {
-			alertas = append(alertas, ProyectoAcademico)
-		}*/
 	} else {
 		helpers.ManejoError(&alerta, &alertas, "", err)
 	}
@@ -146,30 +114,7 @@ func (c *ConsultaProyectoAcademicoController) GetOneRegistroPorId() {
 	idStr := c.Ctx.Input.Param(":id")
 
 	if resultado["Type"] != "error" {
-		var registros []map[string]interface{}
-
-		errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/registro_calificado_acreditacion/?query=ProyectoAcademicoInstitucionId.Id:"+idStr, &registros)
-
-		if errproyecto == nil {
-			services.ManejoRegistrosGetRegistroId(&registros)
-			/*if registros[0]["Id"] != nil {
-				for _, registro := range registros {
-					vigenciatemporal := registro["VigenciaActoAdministrativo"].(string)
-					vigenciatemporal = strings.Replace(vigenciatemporal, "A", " A", 1)
-					registro["VigenciaActoAdministrativo"] = vigenciatemporal
-					if registro["Activo"] == true {
-						registro["ActivoLetra"] = "Si"
-
-					} else if registro["Activo"] == false {
-						registro["ActivoLetra"] = "No"
-					}
-				}
-			}*/
-			c.Data["json"] = registros
-		} else {
-			helpers.ManejoError(&alerta, &alertas, "", errproyecto)
-			c.Data["json"] = alerta
-		}
+		c.Data["json"] = services.PeticionRegistrosGetRegistroId(idStr, &alerta, &alertas)
 	} else {
 		if resultado["Body"] == "<QuerySeter> no row found" {
 			c.Data["json"] = nil
