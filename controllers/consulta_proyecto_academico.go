@@ -41,17 +41,7 @@ func (c *ConsultaProyectoAcademicoController) GetAll() {
 	alertas := append([]interface{}{"Response:"})
 
 	if resultado["Type"] != "error" {
-		var proyectos []map[string]interface{}
-		errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico/", &proyectos)
-
-		if errproyecto == nil {
-			services.ManejoProyectosGetAll(&proyectos)
-
-			c.Data["json"] = proyectos
-		} else {
-			helpers.ManejoError(&alerta, &alertas, "", errproyecto)
-			c.Data["json"] = alerta
-		}
+		c.Data["json"] = services.PeticionProyectos(&alerta, &alertas)
 	} else {
 		if resultado["Body"] == "<QuerySeter> no row found" {
 			c.Data["json"] = nil

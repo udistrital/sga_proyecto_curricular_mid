@@ -12,6 +12,19 @@ import (
 
 // FUNCIONES QUE SE USAN EN GETALL
 
+func PeticionProyectos(alerta *models.Alert, alertas *[]interface{}) interface{} {
+	var proyectos []map[string]interface{}
+	errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico/", &proyectos)
+
+	if errproyecto == nil {
+		ManejoProyectosGetAll(&proyectos)
+		return proyectos
+	} else {
+		helpers.ManejoError(alerta, alertas, "", errproyecto)
+		return *alerta
+	}
+}
+
 func ManejoProyectosGetAll(proyectos *[]map[string]interface{}) {
 	for _, proyecto := range *proyectos {
 		registros := proyecto["Registro"].([]interface{})
