@@ -34,46 +34,14 @@ func (c *CrearProyectoAcademicoController) PostProyecto() {
 	var alerta models.Alert
 	alertas := append([]interface{}{"Response:"})
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &Proyecto_academico); err == nil {
-
-		Proyecto_academicoPost := make(map[string]interface{})
-		Proyecto_academicoPost = map[string]interface{}{
-			"ProyectoAcademicoInstitucion": Proyecto_academico["ProyectoAcademicoInstitucion"],
-			"Enfasis":                      Proyecto_academico["Enfasis"],
-			"Registro":                     Proyecto_academico["Registro"],
-			"Titulaciones":                 Proyecto_academico["Titulaciones"],
-		}
-
-		Proyecto_academico_oikosPost := Proyecto_academico["Oikos"]
-
-		var resultadoOikos map[string]interface{}
-		var resultadoProyecto map[string]interface{}
-
-		errOikos := request.SendJson("http://"+beego.AppConfig.String("OikosService")+"/dependencia_padre/tr_dependencia_padre", "POST", &resultadoOikos, Proyecto_academico_oikosPost)
-		if resultadoOikos["Type"] == "error" || errOikos != nil || resultadoOikos["Status"] == "404" || resultadoOikos["Message"] != nil {
-			helpers.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultadoOikos), errOikos)
+		if !services.ManejoPeticionesProyecto(&Proyecto_academico, &alerta, &alertas) {
 			c.Data["json"] = alerta
 			c.ServeJSON()
-		} else {
-			services.AsignarProyectoAcademico(&alertas, &Proyecto_academico, resultadoOikos, &Proyecto_academicoPost)
-			/*alertas = append(alertas, Proyecto_academico)
-			idDependenciaProyecto := resultadoOikos["HijaId"].(map[string]interface{})["Id"]
-			Proyecto_academicoPost["ProyectoAcademicoInstitucion"].(map[string]interface{})["DependenciaId"] = idDependenciaProyecto*/
 		}
-
-		errProyecto := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico", "POST", &resultadoProyecto, Proyecto_academicoPost)
-		if resultadoProyecto["Type"] == "error" || errProyecto != nil || resultadoProyecto["Status"] == "404" || resultadoProyecto["Message"] != nil {
-			helpers.ManejoError(&alerta, &alertas, "", errProyecto)
-			c.Data["json"] = alerta
-			c.ServeJSON()
-		} else {
-			alertas = append(alertas, Proyecto_academico)
-		}
-
 	} else {
 		helpers.ManejoError(&alerta, &alertas, "", err)
 	}
 
-	//alerta.Body = alertas
 	c.Data["json"] = alerta
 	c.ServeJSON()
 }
@@ -103,56 +71,11 @@ func (c *CrearProyectoAcademicoController) PostCoordinadorById() {
 				if CoordinadorAntiguos[0]["Id"] != nil {
 					services.ManejoCoordinadorAntiguo(&alertas, &alerta, CoordinadorAntiguos)
 					services.RegistrarCoordinador(&alertas, &alerta, CoordinadorNuevo)
-					/*for _, cordinadorFecha := range CoordinadorAntiguos {
-						if cordinadorFecha["Activo"] == true {
-							cordinadorFecha["Activo"] = false
-							coordinador_cambiado := cordinadorFecha
-							coordinador_cambiado["FechaFinalizacion"] = time_bogota.Tiempo_bogota()
-							Id_coordinador_cambiado := cordinadorFecha["Id"]
-							idcoordinador := Id_coordinador_cambiado.(float64)
-							var resultado map[string]interface{}
-							errcoordinadorcambiado := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/proyecto_academico_rol_tercero_dependencia/"+strconv.FormatFloat(idcoordinador, 'f', -1, 64), "PUT", &resultado, &coordinador_cambiado)
-							if resultado["Type"] == "error" || errcoordinadorcambiado != nil || resultado["Status"] == "404" || resultado["Message"] != nil {
-								alertas = append(alertas, resultado)
-								alerta.Type = "error"
-								alerta.Code = "400"
-								alerta.Body = alertas
-							}
-						} else {
-							fmt.Println("Todos los registros estan nulos")
-						}
-
-					}*/
-
-					/*var resultadoCoordinadorNuevo map[string]interface{}
-					CoordinadorNuevo["FechaFinalizacion"] = "0001-01-01T00:00:00-05:00"
-					errRegistro := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/proyecto_academico_rol_tercero_dependencia", "POST", &resultadoCoordinadorNuevo, CoordinadorNuevo)
-					if resultadoCoordinadorNuevo["Type"] == "error" || errRegistro != nil || resultadoCoordinadorNuevo["Status"] == "404" || resultadoCoordinadorNuevo["Message"] != nil {
-						alertas = append(alertas, resultadoCoordinadorNuevo)
-						alerta.Type = "error"
-						alerta.Code = "400"
-						alerta.Body = alertas
-					} else {
-						alertas = append(alertas, CoordinadorNuevo)
-					}*/
-					//alerta.Body = alertas
 					c.Data["json"] = alerta
 					c.ServeJSON()
 				} else {
 					if err := json.Unmarshal(c.Ctx.Input.RequestBody, &CoordinadorNuevo); err == nil {
 						services.RegistrarCoordinador(&alertas, &alerta, CoordinadorNuevo)
-						/*var resultadoCoordinadorNuevo map[string]interface{}
-						CoordinadorNuevo["FechaFinalizacion"] = "0001-01-01T00:00:00-05:00"
-
-						errRegistro := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/proyecto_academico_rol_tercero_dependencia", "POST", &resultadoCoordinadorNuevo, CoordinadorNuevo)
-						if resultadoCoordinadorNuevo["Type"] == "error" || errRegistro != nil || resultadoCoordinadorNuevo["Status"] == "404" || resultadoCoordinadorNuevo["Message"] != nil {
-							alertas = append(alertas, resultadoCoordinadorNuevo)
-							alerta.Type = "error"
-							alerta.Code = "400"
-							alerta.Body = alertas
-						} else {
-							alertas = append(alertas, CoordinadorNuevo)
-						}*/
 					} else {
 						helpers.ManejoError(&alerta, &alertas, "", err)
 					}
