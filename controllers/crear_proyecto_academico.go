@@ -9,6 +9,8 @@ import (
 	"github.com/udistrital/sga_mid_proyecto_curricular/models"
 	"github.com/udistrital/sga_mid_proyecto_curricular/services"
 	"github.com/udistrital/utils_oas/request"
+	"strconv"
+	"github.com/udistrital/utils_oas/time_bogota"
 )
 
 type CrearProyectoAcademicoController struct {

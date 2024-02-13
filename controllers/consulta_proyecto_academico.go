@@ -8,6 +8,8 @@ import (
 	"github.com/udistrital/sga_mid_proyecto_curricular/helpers"
 	"github.com/udistrital/sga_mid_proyecto_curricular/models"
 	"github.com/udistrital/sga_mid_proyecto_curricular/services"
+	"strings"
+	"github.com/udistrital/utils_oas/request"
 )
 
 type ConsultaProyectoAcademicoController struct {
