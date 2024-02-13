@@ -6,7 +6,6 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/udistrital/sga_mid_proyecto_curricular/helpers"
-	"github.com/udistrital/sga_mid_proyecto_curricular/models"
 	"github.com/udistrital/sga_mid_proyecto_curricular/services"
 	"github.com/udistrital/utils_oas/request"
 )
@@ -26,13 +25,11 @@ func (c *CrearProyectoAcademicoController) URLMapping() {
 // @Description Crear Proyecto
 // @Param   body        body    {}  true        "body Agregar Proyecto content"
 // @Success 200 {}
-// @Failure 403 body is empty
+// @Failure 400 the request contains incorrect syntax
 // @router / [post]
 func (c *CrearProyectoAcademicoController) PostProyecto() {
 
 	var Proyecto_academico map[string]interface{}
-	var alerta models.Alert
-	alertas := append([]interface{}{"Response:"})
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &Proyecto_academico); err == nil {
 		if !services.ManejoPeticionesProyecto(&Proyecto_academico, &alerta, &alertas) {
 			c.Data["json"] = alerta
@@ -52,14 +49,14 @@ func (c *CrearProyectoAcademicoController) PostProyecto() {
 // @Param	id		path 	string	true		"The key for staticblock"
 // @Param   body        body    {}  true        "body Agregar Registro content"
 // @Success 200 {object} models.ConsultaProyectoAcademico
-// @Failure 403 :id is empty
+// @Failure 400 the request contains incorrect syntax
 // @router /coordinador [post]
 func (c *CrearProyectoAcademicoController) PostCoordinadorById() {
 	var CoordinadorNuevo map[string]interface{}
 	var resultado map[string]interface{}
-	var alerta models.Alert
+	// var alerta models.Alert
 
-	alertas := []interface{}{"Response:"}
+	// alertas := []interface{}{"Response:"}
 
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &CoordinadorNuevo); err == nil {
 		if resultado["Type"] != "error" {
@@ -85,7 +82,8 @@ func (c *CrearProyectoAcademicoController) PostCoordinadorById() {
 				c.Data["json"] = alerta
 			}
 		} else {
-			if resultado["Body"] == "<QuerySeter> no row found" {
+			errorMessage := resultado["Body"].(string)
+			if errorMessage == "<QuerySeter> no row found" {
 				c.Data["json"] = nil
 			} else {
 				helpers.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultado["Body"]))
