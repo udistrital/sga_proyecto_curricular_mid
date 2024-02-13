@@ -3,12 +3,12 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/logs"
+	"github.com/udistrital/sga_mid_proyecto_curricular/helpers"
+	"github.com/udistrital/sga_mid_proyecto_curricular/models"
+	"github.com/udistrital/sga_mid_proyecto_curricular/services"
 	"github.com/udistrital/utils_oas/request"
-	"github.com/udistrital/utils_oas/time_bogota"
 )
 
 type CrearProyectoAcademicoController struct {
@@ -29,57 +29,20 @@ func (c *CrearProyectoAcademicoController) URLMapping() {
 // @Failure 400 the request contains incorrect syntax
 // @router / [post]
 func (c *CrearProyectoAcademicoController) PostProyecto() {
+	var alerta models.Alert
+	var alertas []interface{}
 
 	var Proyecto_academico map[string]interface{}
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &Proyecto_academico); err == nil {
-
-		Proyecto_academicoPost := make(map[string]interface{})
-		Proyecto_academicoPost = map[string]interface{}{
-			"ProyectoAcademicoInstitucion": Proyecto_academico["ProyectoAcademicoInstitucion"],
-			"Enfasis":                      Proyecto_academico["Enfasis"],
-			"Registro":                     Proyecto_academico["Registro"],
-			"Titulaciones":                 Proyecto_academico["Titulaciones"],
+		if !services.ManejoPeticionesProyecto(&Proyecto_academico, &alerta, &alertas) {
+			c.Data["json"] = alerta
+			c.ServeJSON()
 		}
-
-		Proyecto_academico_oikosPost := Proyecto_academico["Oikos"]
-
-		var resultadoOikos map[string]interface{}
-		var resultadoProyecto map[string]interface{}
-
-		errOikos := request.SendJson("http://"+beego.AppConfig.String("OikosService")+"/dependencia_padre/tr_dependencia_padre", "POST", &resultadoOikos, Proyecto_academico_oikosPost)
-		if resultadoOikos["Type"] == "error" || errOikos != nil || resultadoOikos["Status"] == "404" || resultadoOikos["Message"] != nil {
-
-			errorMessage := "Error in GetOnePorId: "
-			if errOikos != nil {
-				errorMessage += "Oikos: " + errOikos.Error() + "; "
-			} else {
-				errorMessage += "Resultado Oikos: " + resultadoOikos["Message"].(string) + "; "
-			}
-
-			logs.Error(errorMessage)
-			c.Data["message"] = "Error service PostProyecto: " + errorMessage
-			c.Abort("404")
-		} else {
-			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": Proyecto_academico}
-			idDependenciaProyecto := resultadoOikos["HijaId"].(map[string]interface{})["Id"]
-			Proyecto_academicoPost["ProyectoAcademicoInstitucion"].(map[string]interface{})["DependenciaId"] = idDependenciaProyecto
-		}
-
-		errProyecto := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico", "POST", &resultadoProyecto, Proyecto_academicoPost)
-		if resultadoProyecto["Type"] == "error" || errProyecto != nil || resultadoProyecto["Status"] == "404" || resultadoProyecto["Message"] != nil {
-			logs.Error(errProyecto)
-			c.Data["message"] = "Error service PostProyecto: " + errProyecto
-			c.Abort("404")
-		} else {
-			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": Proyecto_academico}
-		}
-
 	} else {
-		logs.Error(err)
-		c.Data["message"] = "Error service PostProyecto: " + err.Error()
-		c.Abort("404")
+		helpers.ManejoError(&alerta, &alertas, "", err)
 	}
 
+	c.Data["json"] = alerta
 	c.ServeJSON()
 }
 
@@ -94,6 +57,8 @@ func (c *CrearProyectoAcademicoController) PostProyecto() {
 func (c *CrearProyectoAcademicoController) PostCoordinadorById() {
 	var CoordinadorNuevo map[string]interface{}
 	var resultado map[string]interface{}
+	var alerta models.Alert
+	var alertas []interface{}
 	// var alerta models.Alert
 
 	// alertas := []interface{}{"Response:"}
@@ -106,81 +71,34 @@ func (c *CrearProyectoAcademicoController) PostCoordinadorById() {
 			errcordinador := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/proyecto_academico_rol_tercero_dependencia/?query=ProyectoAcademicoInstitucionId.Id:"+idStr, &CoordinadorAntiguos)
 			if errcordinador == nil {
 				if CoordinadorAntiguos[0]["Id"] != nil {
-
-					for _, cordinadorFecha := range CoordinadorAntiguos {
-						if cordinadorFecha["Activo"] == true {
-							cordinadorFecha["Activo"] = false
-							coordinador_cambiado := cordinadorFecha
-							coordinador_cambiado["FechaFinalizacion"] = time_bogota.Tiempo_bogota()
-							Id_coordinador_cambiado := cordinadorFecha["Id"]
-							idcoordinador := Id_coordinador_cambiado.(float64)
-							var resultado map[string]interface{}
-							errcoordinadorcambiado := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/proyecto_academico_rol_tercero_dependencia/"+strconv.FormatFloat(idcoordinador, 'f', -1, 64), "PUT", &resultado, &coordinador_cambiado)
-							if resultado["Type"] == "error" || errcoordinadorcambiado != nil || resultado["Status"] == "404" || resultado["Message"] != nil {
-								logs.Error(resultado)
-								c.Data["message"] = "Error service PostCoordinadorById: " + resultado["Message"].(string)
-								c.Abort("404")
-							}
-						} else {
-							fmt.Println("Todos los registros estan nulos")
-						}
-
-					}
-
-					var resultadoCoordinadorNuevo map[string]interface{}
-					CoordinadorNuevo["FechaFinalizacion"] = "0001-01-01T00:00:00-05:00"
-					errRegistro := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/proyecto_academico_rol_tercero_dependencia", "POST", &resultadoCoordinadorNuevo, CoordinadorNuevo)
-					if resultadoCoordinadorNuevo["Type"] == "error" || errRegistro != nil || resultadoCoordinadorNuevo["Status"] == "404" || resultadoCoordinadorNuevo["Message"] != nil {
-						logs.Error(resultadoCoordinadorNuevo)
-						c.Data["message"] = "Error service PostCoordinadorById: " + resultadoCoordinadorNuevo["Message"].(string)
-						c.Abort("404")
-					} else {
-						c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": CoordinadorNuevo}
-					}
-
+					services.ManejoCoordinadorAntiguo(&alertas, &alerta, CoordinadorAntiguos)
+					services.RegistrarCoordinador(&alertas, &alerta, CoordinadorNuevo)
+					c.Data["json"] = alerta
 					c.ServeJSON()
 				} else {
 					if err := json.Unmarshal(c.Ctx.Input.RequestBody, &CoordinadorNuevo); err == nil {
-						var resultadoCoordinadorNuevo map[string]interface{}
-						CoordinadorNuevo["FechaFinalizacion"] = "0001-01-01T00:00:00-05:00"
-
-						errRegistro := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/proyecto_academico_rol_tercero_dependencia", "POST", &resultadoCoordinadorNuevo, CoordinadorNuevo)
-						if resultadoCoordinadorNuevo["Type"] == "error" || errRegistro != nil || resultadoCoordinadorNuevo["Status"] == "404" || resultadoCoordinadorNuevo["Message"] != nil {
-							logs.Error(resultadoCoordinadorNuevo)
-							c.Data["message"] = "Error service PostCoordinadorById: " + resultadoCoordinadorNuevo["Message"].(string)
-							c.Abort("404")
-
-						} else {
-							c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": CoordinadorNuevo}
-						}
-
+						services.RegistrarCoordinador(&alertas, &alerta, CoordinadorNuevo)
 					} else {
-						logs.Error(err)
-						c.Data["message"] = "Error service PostCoordinadorById: " + err.Error()
-						c.Abort("404")
+						helpers.ManejoError(&alerta, &alertas, "", err)
 					}
-
 				}
 			} else {
-				logs.Error(errcordinador)
-				c.Data["message"] = "Error service PostCoordinadorById: " + errcordinador.Error()
-				c.Abort("404")
+				helpers.ManejoError(&alerta, &alertas, "", errcordinador)
+				c.Data["json"] = alerta
 			}
 		} else {
 			errorMessage := resultado["Body"].(string)
 			if errorMessage == "<QuerySeter> no row found" {
 				c.Data["json"] = nil
 			} else {
-				logs.Error(resultado)
-				c.Data["message"] = "Error service PostCoordinadorById: " + errorMessage
-				c.Abort("404")
+				helpers.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultado["Body"]))
+				c.Data["json"] = alerta
 			}
 		}
 	} else {
-		logs.Error(err)
-		c.Data["message"] = "Error service PostCoordinadorById: " + err.Error()
-		c.Abort("404")
+		helpers.ManejoError(&alerta, &alertas, "", err)
 	}
-
+	//alerta.Body = alertas
+	c.Data["json"] = alerta
 	c.ServeJSON()
 }
