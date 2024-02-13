@@ -6,6 +6,7 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/udistrital/sga_mid_proyecto_curricular/helpers"
+	"github.com/udistrital/sga_mid_proyecto_curricular/models"
 	"github.com/udistrital/sga_mid_proyecto_curricular/services"
 	"github.com/udistrital/utils_oas/request"
 )
@@ -28,6 +29,8 @@ func (c *CrearProyectoAcademicoController) URLMapping() {
 // @Failure 400 the request contains incorrect syntax
 // @router / [post]
 func (c *CrearProyectoAcademicoController) PostProyecto() {
+	var alerta models.Alert
+	var alertas []interface{}
 
 	var Proyecto_academico map[string]interface{}
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &Proyecto_academico); err == nil {
@@ -54,6 +57,8 @@ func (c *CrearProyectoAcademicoController) PostProyecto() {
 func (c *CrearProyectoAcademicoController) PostCoordinadorById() {
 	var CoordinadorNuevo map[string]interface{}
 	var resultado map[string]interface{}
+	var alerta models.Alert
+	var alertas []interface{}
 	// var alerta models.Alert
 
 	// alertas := []interface{}{"Response:"}

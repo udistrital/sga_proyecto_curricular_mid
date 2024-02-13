@@ -6,6 +6,7 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/udistrital/sga_mid_proyecto_curricular/helpers"
+	"github.com/udistrital/sga_mid_proyecto_curricular/models"
 	"github.com/udistrital/sga_mid_proyecto_curricular/services"
 )
 
@@ -35,6 +36,8 @@ func (c *ConsultaProyectoAcademicoController) URLMapping() {
 // @router / [get]
 func (c *ConsultaProyectoAcademicoController) GetAll() {
 	var resultado map[string]interface{}
+	var alerta models.Alert
+	var alertas []interface{}
 
 	if resultado["Type"] != "error" {
 		c.Data["json"] = services.PeticionProyectos(&alerta, &alertas)
@@ -59,6 +62,8 @@ func (c *ConsultaProyectoAcademicoController) GetAll() {
 // @router /:id [get]
 func (c *ConsultaProyectoAcademicoController) GetOnePorId() {
 	var resultado map[string]interface{}
+	var alerta models.Alert
+	var alertas []interface{}
 	idStr := c.Ctx.Input.Param(":id")
 
 	if resultado["Type"] != "error" {
@@ -86,6 +91,8 @@ func (c *ConsultaProyectoAcademicoController) GetOnePorId() {
 func (c *ConsultaProyectoAcademicoController) PutInhabilitarProyecto() {
 	idStr := c.Ctx.Input.Param(":id")
 	var ProyectoAcademico map[string]interface{}
+	var alerta models.Alert
+	var alertas []interface{}
 
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &ProyectoAcademico); err == nil {
 		services.InhabilitarProyecto(&alerta, &alertas, idStr, ProyectoAcademico)
@@ -105,6 +112,8 @@ func (c *ConsultaProyectoAcademicoController) PutInhabilitarProyecto() {
 // @router /get_registro/:id [get]
 func (c *ConsultaProyectoAcademicoController) GetOneRegistroPorId() {
 	var resultado map[string]interface{}
+	var alerta models.Alert
+	var alertas []interface{}
 	idStr := c.Ctx.Input.Param(":id")
 
 	if resultado["Type"] != "error" {
