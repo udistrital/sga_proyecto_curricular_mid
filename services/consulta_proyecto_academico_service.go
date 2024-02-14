@@ -12,16 +12,16 @@ import (
 
 // FUNCIONES QUE SE USAN EN GETALL
 
-func PeticionProyectos(alerta *models.Alert, alertas *[]interface{}) interface{} {
+func PeticionProyectos(alerta *models.Alert, alertas *[]interface{}) (interface{}, bool) {
 	var proyectos []map[string]interface{}
 	errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico/", &proyectos)
 
 	if errproyecto == nil {
 		manejoProyectosGetAll(&proyectos)
-		return proyectos
+		return proyectos, true
 	} else {
 		helpers.ManejoError(alerta, alertas, "", errproyecto)
-		return *alerta
+		return *alerta, false
 	}
 }
 
@@ -150,17 +150,17 @@ func manejoProyectosGetOneId(proyectos *[]map[string]interface{}, unidades []map
 	}
 }
 
-func validarProyecto(errproyecto error, errunidad interface{}, proyectos *[]map[string]interface{}, unidades []map[string]interface{}, idUnidad float64, alerta *models.Alert, alertas *[]interface{}) interface{} {
+func validarProyecto(errproyecto error, errunidad interface{}, proyectos *[]map[string]interface{}, unidades []map[string]interface{}, idUnidad float64, alerta *models.Alert, alertas *[]interface{}) (interface{}, bool) {
 	if errproyecto == nil && errunidad == nil {
 		manejoProyectosGetOneId(proyectos, unidades, idUnidad)
-		return proyectos
+		return proyectos, true
 	} else {
 		helpers.ManejoError(alerta, alertas, "", errproyecto)
-		return *alerta
+		return *alerta, false
 	}
 }
 
-func PeticionProyectosGetOneId(idStr string, alerta *models.Alert, alertas *[]interface{}) interface{} {
+func PeticionProyectosGetOneId(idStr string, alerta *models.Alert, alertas *[]interface{}) (interface{}, bool) {
 	// var idOikos float64
 	var idUnidad float64
 	var proyectos []map[string]interface{}
@@ -173,19 +173,21 @@ func PeticionProyectosGetOneId(idStr string, alerta *models.Alert, alertas *[]in
 	if proyectos[0]["ProyectoAcademico"] != nil {
 		return validarProyecto(errproyecto, errunidad, &proyectos, unidades, idUnidad, alerta, alertas)
 	} else {
-		return proyectos
+		return proyectos, false
 	}
 }
 
 // FUNCIONES QUE SE USAN EN PUT INHABILITAR PROYECTO
 
-func InhabilitarProyecto(alerta *models.Alert, alertas *[]interface{}, idStr string, ProyectoAcademico map[string]interface{}) {
+func InhabilitarProyecto(alerta *models.Alert, alertas *[]interface{}, idStr string, ProyectoAcademico map[string]interface{}) bool {
 	var resultadoProyecto map[string]interface{}
 	errProyecto := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/proyecto_academico_institucion/"+idStr, "PUT", &resultadoProyecto, ProyectoAcademico)
 	if resultadoProyecto["Type"] == "error" || errProyecto != nil || resultadoProyecto["Status"] == "404" || resultadoProyecto["Message"] != nil {
 		helpers.ManejoError(alerta, alertas, fmt.Sprintf("%v", resultadoProyecto))
+		return false
 	} else {
 		*alertas = append(*alertas, ProyectoAcademico)
+		return true
 	}
 }
 
@@ -207,16 +209,16 @@ func manejoRegistrosGetRegistroId(registros *[]map[string]interface{}) {
 	}
 }
 
-func PeticionRegistrosGetRegistroId(idStr string, alerta *models.Alert, alertas *[]interface{}) interface{} {
+func PeticionRegistrosGetRegistroId(idStr string, alerta *models.Alert, alertas *[]interface{}) (interface{}, bool) {
 	var registros []map[string]interface{}
 
 	errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/registro_calificado_acreditacion/?query=ProyectoAcademicoInstitucionId.Id:"+idStr, &registros)
 
 	if errproyecto == nil {
 		manejoRegistrosGetRegistroId(&registros)
-		return registros
+		return registros, true
 	} else {
 		helpers.ManejoError(alerta, alertas, "", errproyecto)
-		return *alerta
+		return *alerta, false
 	}
 }

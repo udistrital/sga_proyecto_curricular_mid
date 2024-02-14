@@ -8,6 +8,7 @@ import (
 	"github.com/udistrital/sga_mid_proyecto_curricular/helpers"
 	"github.com/udistrital/sga_mid_proyecto_curricular/models"
 	"github.com/udistrital/sga_mid_proyecto_curricular/services"
+	"github.com/udistrital/utils_oas/errorhandler"
 	"github.com/udistrital/utils_oas/request"
 )
 
@@ -29,14 +30,18 @@ func (c *CrearProyectoAcademicoController) URLMapping() {
 // @Failure 403 body is empty
 // @router / [post]
 func (c *CrearProyectoAcademicoController) PostProyecto() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	var Proyecto_academico map[string]interface{}
 	var alerta models.Alert
 	alertas := append([]interface{}{"Response:"})
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &Proyecto_academico); err == nil {
 		if !services.ManejoPeticionesProyecto(&Proyecto_academico, &alerta, &alertas) {
+			c.Ctx.Output.SetStatus(404)
 			c.Data["json"] = alerta
 			c.ServeJSON()
+		} else {
+			c.Ctx.Output.SetStatus(200)
 		}
 	} else {
 		helpers.ManejoError(&alerta, &alertas, "", err)
@@ -55,6 +60,8 @@ func (c *CrearProyectoAcademicoController) PostProyecto() {
 // @Failure 403 :id is empty
 // @router /coordinador [post]
 func (c *CrearProyectoAcademicoController) PostCoordinadorById() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
 	var CoordinadorNuevo map[string]interface{}
 	var resultado map[string]interface{}
 	var alerta models.Alert
@@ -69,30 +76,45 @@ func (c *CrearProyectoAcademicoController) PostCoordinadorById() {
 			errcordinador := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/proyecto_academico_rol_tercero_dependencia/?query=ProyectoAcademicoInstitucionId.Id:"+idStr, &CoordinadorAntiguos)
 			if errcordinador == nil {
 				if CoordinadorAntiguos[0]["Id"] != nil {
-					services.ManejoCoordinadorAntiguo(&alertas, &alerta, CoordinadorAntiguos)
-					services.RegistrarCoordinador(&alertas, &alerta, CoordinadorNuevo)
+					if exito := services.ManejoCoordinadorAntiguo(&alertas, &alerta, CoordinadorAntiguos); !exito {
+						c.Ctx.Output.SetStatus(400)
+					}
+					if exito := services.RegistrarCoordinador(&alertas, &alerta, CoordinadorNuevo); !exito {
+						c.Ctx.Output.SetStatus(400)
+					}
+
+					c.Ctx.Output.SetStatus(200)
 					c.Data["json"] = alerta
 					c.ServeJSON()
 				} else {
 					if err := json.Unmarshal(c.Ctx.Input.RequestBody, &CoordinadorNuevo); err == nil {
-						services.RegistrarCoordinador(&alertas, &alerta, CoordinadorNuevo)
+						if exito := services.RegistrarCoordinador(&alertas, &alerta, CoordinadorNuevo); !exito {
+							c.Ctx.Output.SetStatus(404)
+						} else {
+							c.Ctx.Output.SetStatus(200)
+						}
 					} else {
+						c.Ctx.Output.SetStatus(400)
 						helpers.ManejoError(&alerta, &alertas, "", err)
 					}
 				}
 			} else {
+				c.Ctx.Output.SetStatus(400)
 				helpers.ManejoError(&alerta, &alertas, "", errcordinador)
 				c.Data["json"] = alerta
 			}
 		} else {
 			if resultado["Body"] == "<QuerySeter> no row found" {
+				c.Ctx.Output.SetStatus(404)
 				c.Data["json"] = nil
 			} else {
+				c.Ctx.Output.SetStatus(400)
 				helpers.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultado["Body"]))
 				c.Data["json"] = alerta
 			}
 		}
 	} else {
+		c.Ctx.Output.SetStatus(400)
 		helpers.ManejoError(&alerta, &alertas, "", err)
 	}
 	//alerta.Body = alertas
