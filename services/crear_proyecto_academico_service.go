@@ -5,8 +5,8 @@ import (
 	"strconv"
 
 	"github.com/astaxie/beego"
-	"github.com/udistrital/sga_proyecto_curricular_mid/helpers"
-	"github.com/udistrital/sga_proyecto_curricular_mid/models"
+	"github.com/udistrital/sga_mid_proyecto_curricular/helpers"
+	"github.com/udistrital/sga_mid_proyecto_curricular/models"
 	"github.com/udistrital/utils_oas/request"
 	"github.com/udistrital/utils_oas/time_bogota"
 )
