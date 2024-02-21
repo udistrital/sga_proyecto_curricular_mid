@@ -1,6 +1,6 @@
 package helpers
 
-import "github.com/udistrital/sga_mid_proyecto_curricular/models"
+import "github.com/udistrital/sga_proyecto_curricular_mid/models"
 
 func ManejoError(alerta *models.Alert, alertas *[]interface{}, mensaje string, err ...error) {
 	var msj string

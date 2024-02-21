@@ -5,11 +5,10 @@ import (
 	"fmt"
 
 	"github.com/astaxie/beego"
-	"github.com/udistrital/sga_mid_proyecto_curricular/helpers"
-	"github.com/udistrital/sga_mid_proyecto_curricular/models"
-	"github.com/udistrital/sga_mid_proyecto_curricular/services"
-	"strings"
-	"github.com/udistrital/utils_oas/request"
+	"github.com/udistrital/sga_proyecto_curricular_mid/helpers"
+	"github.com/udistrital/sga_proyecto_curricular_mid/models"
+	"github.com/udistrital/sga_proyecto_curricular_mid/services"
+	"github.com/udistrital/utils_oas/errorhandler"
 )
 
 type ConsultaProyectoAcademicoController struct {
@@ -37,17 +36,26 @@ func (c *ConsultaProyectoAcademicoController) URLMapping() {
 // @Failure 404 not found resource
 // @router / [get]
 func (c *ConsultaProyectoAcademicoController) GetAll() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
 	var resultado map[string]interface{}
 	var alerta models.Alert
 	var alertas []interface{}
 
 	if resultado["Type"] != "error" {
-		c.Data["json"] = services.PeticionProyectos(&alerta, &alertas)
+		if respuesta, exito := services.PeticionProyectos(&alerta, &alertas); !exito {
+			c.Ctx.Output.SetStatus(404)
+			c.Data["json"] = respuesta
+		} else {
+			c.Ctx.Output.SetStatus(200)
+			c.Data["json"] = respuesta
+		}
 	} else {
-		errorMessage := resultado["Body"].(string)
-		if errorMessage == "<QuerySeter> no row found" {
+		if resultado["Body"] == "<QuerySeter> no row found" {
+			c.Ctx.Output.SetStatus(404)
 			c.Data["json"] = nil
 		} else {
+			c.Ctx.Output.SetStatus(400)
 			helpers.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultado["Body"]))
 			c.Data["json"] = alerta
 		}
@@ -63,18 +71,27 @@ func (c *ConsultaProyectoAcademicoController) GetAll() {
 // @Failure 404 not found resource
 // @router /:id [get]
 func (c *ConsultaProyectoAcademicoController) GetOnePorId() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
 	var resultado map[string]interface{}
 	var alerta models.Alert
 	var alertas []interface{}
 	idStr := c.Ctx.Input.Param(":id")
 
 	if resultado["Type"] != "error" {
-		c.Data["json"] = services.PeticionProyectosGetOneId(idStr, &alerta, &alertas)
+		if respuesta, exito := services.PeticionProyectosGetOneId(idStr, &alerta, &alertas); !exito {
+			c.Ctx.Output.SetStatus(404)
+			c.Data["json"] = respuesta
+		} else {
+			c.Ctx.Output.SetStatus(200)
+			c.Data["json"] = respuesta
+		}
 	} else {
-		errorMessage := resultado["Body"].(string)
-		if errorMessage == "<QuerySeter> no row found" {
+		if resultado["Body"] == "<QuerySeter> no row found" {
+			c.Ctx.Output.SetStatus(404)
 			c.Data["json"] = nil
 		} else {
+			c.Ctx.Output.SetStatus(400)
 			helpers.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultado["Body"]))
 			c.Data["json"] = alerta
 		}
@@ -91,14 +108,21 @@ func (c *ConsultaProyectoAcademicoController) GetOnePorId() {
 // @Failure 400 the request contains incorrect syntax
 // @router /inhabilitar_proyecto/:id [put]
 func (c *ConsultaProyectoAcademicoController) PutInhabilitarProyecto() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
 	idStr := c.Ctx.Input.Param(":id")
 	var ProyectoAcademico map[string]interface{}
 	var alerta models.Alert
 	var alertas []interface{}
 
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &ProyectoAcademico); err == nil {
-		services.InhabilitarProyecto(&alerta, &alertas, idStr, ProyectoAcademico)
+		if exito := services.InhabilitarProyecto(&alerta, &alertas, idStr, ProyectoAcademico); !exito {
+			c.Ctx.Output.SetStatus(404)
+		} else {
+			c.Ctx.Output.SetStatus(200)
+		}
 	} else {
+		c.Ctx.Output.SetStatus(400)
 		helpers.ManejoError(&alerta, &alertas, "", err)
 	}
 	c.Data["json"] = alerta
@@ -113,18 +137,27 @@ func (c *ConsultaProyectoAcademicoController) PutInhabilitarProyecto() {
 // @Failure 403 :id is empty
 // @router /get_registro/:id [get]
 func (c *ConsultaProyectoAcademicoController) GetOneRegistroPorId() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
 	var resultado map[string]interface{}
 	var alerta models.Alert
 	var alertas []interface{}
 	idStr := c.Ctx.Input.Param(":id")
 
 	if resultado["Type"] != "error" {
-		c.Data["json"] = services.PeticionRegistrosGetRegistroId(idStr, &alerta, &alertas)
+		if respuesta, exito := services.PeticionRegistrosGetRegistroId(idStr, &alerta, &alertas); !exito {
+			c.Ctx.Output.SetStatus(404)
+			c.Data["json"] = respuesta
+		} else {
+			c.Ctx.Output.SetStatus(200)
+			c.Data["json"] = respuesta
+		}
 	} else {
-		errorMessage := resultado["Body"].(string)
-		if errorMessage == "<QuerySeter> no row found" {
+		if resultado["Body"] == "<QuerySeter> no row found" {
+			c.Ctx.Output.SetStatus(404)
 			c.Data["json"] = nil
 		} else {
+			c.Ctx.Output.SetStatus(400)
 			helpers.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultado["Body"]))
 			c.Data["json"] = alerta
 		}
