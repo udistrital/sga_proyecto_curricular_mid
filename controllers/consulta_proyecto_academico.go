@@ -33,14 +33,14 @@ func (c *ConsultaProyectoAcademicoController) URLMapping() {
 // @Param	limit	query	string	false	"Limit the size of result set. Must be an integer"
 // @Param	offset	query	string	false	"Start position of result set. Must be an integer"
 // @Success 200 {object} models.ConsultaProyectoAcademico
-// @Failure 403
+// @Failure 404 not found resource
 // @router / [get]
 func (c *ConsultaProyectoAcademicoController) GetAll() {
 	defer errorhandler.HandlePanic(&c.Controller)
 
 	var resultado map[string]interface{}
 	var alerta models.Alert
-	alertas := append([]interface{}{"Response:"})
+	var alertas []interface{}
 
 	if resultado["Type"] != "error" {
 		if respuesta, exito := services.PeticionProyectos(&alerta, &alertas); !exito {
@@ -68,14 +68,14 @@ func (c *ConsultaProyectoAcademicoController) GetAll() {
 // @Description get ConsultaProyectoAcademico by id
 // @Param	id		path 	string	true		"The key for staticblock"
 // @Success 200 {object} models.ConsultaProyectoAcademico
-// @Failure 403 :id is empty
+// @Failure 404 not found resource
 // @router /:id [get]
 func (c *ConsultaProyectoAcademicoController) GetOnePorId() {
 	defer errorhandler.HandlePanic(&c.Controller)
 
 	var resultado map[string]interface{}
 	var alerta models.Alert
-	alertas := append([]interface{}{"Response:"})
+	var alertas []interface{}
 	idStr := c.Ctx.Input.Param(":id")
 
 	if resultado["Type"] != "error" {
@@ -105,7 +105,7 @@ func (c *ConsultaProyectoAcademicoController) GetOnePorId() {
 // @Param	id		path 	string	true		"el id del proyecto a inhabilitar"
 // @Param   body        body    {}  true        "body Inhabilitar Proyecto content"
 // @Success 200 {}
-// @Failure 403 :id is empty
+// @Failure 400 the request contains incorrect syntax
 // @router /inhabilitar_proyecto/:id [put]
 func (c *ConsultaProyectoAcademicoController) PutInhabilitarProyecto() {
 	defer errorhandler.HandlePanic(&c.Controller)
@@ -113,7 +113,8 @@ func (c *ConsultaProyectoAcademicoController) PutInhabilitarProyecto() {
 	idStr := c.Ctx.Input.Param(":id")
 	var ProyectoAcademico map[string]interface{}
 	var alerta models.Alert
-	alertas := append([]interface{}{"Response:"})
+	var alertas []interface{}
+
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &ProyectoAcademico); err == nil {
 		if exito := services.InhabilitarProyecto(&alerta, &alertas, idStr, ProyectoAcademico); !exito {
 			c.Ctx.Output.SetStatus(404)
@@ -140,7 +141,7 @@ func (c *ConsultaProyectoAcademicoController) GetOneRegistroPorId() {
 
 	var resultado map[string]interface{}
 	var alerta models.Alert
-	alertas := append([]interface{}{"Response:"})
+	var alertas []interface{}
 	idStr := c.Ctx.Input.Param(":id")
 
 	if resultado["Type"] != "error" {
