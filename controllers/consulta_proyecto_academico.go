@@ -1,12 +1,7 @@
 package controllers
 
 import (
-	"encoding/json"
-	"fmt"
-
 	"github.com/astaxie/beego"
-	"github.com/udistrital/sga_proyecto_curricular_mid/helpers"
-	"github.com/udistrital/sga_proyecto_curricular_mid/models"
 	"github.com/udistrital/sga_proyecto_curricular_mid/services"
 	"github.com/udistrital/utils_oas/errorhandler"
 )
@@ -38,28 +33,10 @@ func (c *ConsultaProyectoAcademicoController) URLMapping() {
 func (c *ConsultaProyectoAcademicoController) GetAll() {
 	defer errorhandler.HandlePanic(&c.Controller)
 
-	var resultado map[string]interface{}
-	var alerta models.Alert
-	var alertas []interface{}
-
-	if resultado["Type"] != "error" {
-		if respuesta, exito := services.PeticionProyectos(&alerta, &alertas); !exito {
-			c.Ctx.Output.SetStatus(404)
-			c.Data["json"] = respuesta
-		} else {
-			c.Ctx.Output.SetStatus(200)
-			c.Data["json"] = respuesta
-		}
-	} else {
-		if resultado["Body"] == "<QuerySeter> no row found" {
-			c.Ctx.Output.SetStatus(404)
-			c.Data["json"] = nil
-		} else {
-			c.Ctx.Output.SetStatus(400)
-			helpers.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultado["Body"]))
-			c.Data["json"] = alerta
-		}
-	}
+	respuesta := services.PeticionProyectos()
+	
+	c.Ctx.Output.SetStatus(respuesta.Status)
+	c.Data["json"] = respuesta
 	c.ServeJSON()
 }
 
@@ -73,29 +50,11 @@ func (c *ConsultaProyectoAcademicoController) GetAll() {
 func (c *ConsultaProyectoAcademicoController) GetOnePorId() {
 	defer errorhandler.HandlePanic(&c.Controller)
 
-	var resultado map[string]interface{}
-	var alerta models.Alert
-	var alertas []interface{}
 	idStr := c.Ctx.Input.Param(":id")
 
-	if resultado["Type"] != "error" {
-		if respuesta, exito := services.PeticionProyectosGetOneId(idStr, &alerta, &alertas); !exito {
-			c.Ctx.Output.SetStatus(404)
-			c.Data["json"] = respuesta
-		} else {
-			c.Ctx.Output.SetStatus(200)
-			c.Data["json"] = respuesta
-		}
-	} else {
-		if resultado["Body"] == "<QuerySeter> no row found" {
-			c.Ctx.Output.SetStatus(404)
-			c.Data["json"] = nil
-		} else {
-			c.Ctx.Output.SetStatus(400)
-			helpers.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultado["Body"]))
-			c.Data["json"] = alerta
-		}
-	}
+	respuesta := services.PeticionProyectosGetOneId(idStr)
+	c.Ctx.Output.SetStatus(respuesta.Status)
+	c.Data["json"] = respuesta
 	c.ServeJSON()
 }
 
@@ -111,21 +70,12 @@ func (c *ConsultaProyectoAcademicoController) PutInhabilitarProyecto() {
 	defer errorhandler.HandlePanic(&c.Controller)
 
 	idStr := c.Ctx.Input.Param(":id")
-	var ProyectoAcademico map[string]interface{}
-	var alerta models.Alert
-	var alertas []interface{}
+	data := c.Ctx.Input.RequestBody
 
-	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &ProyectoAcademico); err == nil {
-		if exito := services.InhabilitarProyecto(&alerta, &alertas, idStr, ProyectoAcademico); !exito {
-			c.Ctx.Output.SetStatus(404)
-		} else {
-			c.Ctx.Output.SetStatus(200)
-		}
-	} else {
-		c.Ctx.Output.SetStatus(400)
-		helpers.ManejoError(&alerta, &alertas, "", err)
-	}
-	c.Data["json"] = alerta
+	respuesta := services.InhabilitarProyecto(idStr, data)
+
+	c.Ctx.Output.SetStatus(respuesta.Status)
+	c.Data["json"] = respuesta
 	c.ServeJSON()
 }
 
@@ -139,28 +89,10 @@ func (c *ConsultaProyectoAcademicoController) PutInhabilitarProyecto() {
 func (c *ConsultaProyectoAcademicoController) GetOneRegistroPorId() {
 	defer errorhandler.HandlePanic(&c.Controller)
 
-	var resultado map[string]interface{}
-	var alerta models.Alert
-	var alertas []interface{}
 	idStr := c.Ctx.Input.Param(":id")
 
-	if resultado["Type"] != "error" {
-		if respuesta, exito := services.PeticionRegistrosGetRegistroId(idStr, &alerta, &alertas); !exito {
-			c.Ctx.Output.SetStatus(404)
-			c.Data["json"] = respuesta
-		} else {
-			c.Ctx.Output.SetStatus(200)
-			c.Data["json"] = respuesta
-		}
-	} else {
-		if resultado["Body"] == "<QuerySeter> no row found" {
-			c.Ctx.Output.SetStatus(404)
-			c.Data["json"] = nil
-		} else {
-			c.Ctx.Output.SetStatus(400)
-			helpers.ManejoError(&alerta, &alertas, fmt.Sprintf("%v", resultado["Body"]))
-			c.Data["json"] = alerta
-		}
-	}
+	repuesta := services.PeticionRegistrosGetRegistroId(idStr)
+	c.Ctx.Output.SetStatus(repuesta.Status)
+	c.Data["json"] = repuesta
 	c.ServeJSON()
 }
