@@ -1,27 +1,28 @@
 package services
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/astaxie/beego"
-	"github.com/udistrital/sga_proyecto_curricular_mid/helpers"
-	"github.com/udistrital/sga_proyecto_curricular_mid/models"
 	"github.com/udistrital/utils_oas/request"
+	"github.com/udistrital/utils_oas/requestresponse"
 )
 
 // FUNCIONES QUE SE USAN EN GETALL
 
-func PeticionProyectos(alerta *models.Alert, alertas *[]interface{}) (interface{}, bool) {
+func PeticionProyectos() (APIResponseDTO requestresponse.APIResponse) {
 	var proyectos []map[string]interface{}
 	errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico/", &proyectos)
 
 	if errproyecto == nil {
 		manejoProyectosGetAll(&proyectos)
-		return proyectos, true
+		APIResponseDTO = requestresponse.APIResponseDTO(true, 200, proyectos)
+		return APIResponseDTO
 	} else {
-		helpers.ManejoError(alerta, alertas, "", errproyecto)
-		return *alerta, false
+		APIResponseDTO = requestresponse.APIResponseDTO(false, 400, nil, errproyecto.Error())
+		return APIResponseDTO
 	}
 }
 
@@ -150,17 +151,16 @@ func manejoProyectosGetOneId(proyectos *[]map[string]interface{}, unidades []map
 	}
 }
 
-func validarProyecto(errproyecto error, errunidad interface{}, proyectos *[]map[string]interface{}, unidades []map[string]interface{}, idUnidad float64, alerta *models.Alert, alertas *[]interface{}) (interface{}, bool) {
+func validarProyecto(errproyecto error, errunidad interface{}, proyectos *[]map[string]interface{}, unidades []map[string]interface{}, idUnidad float64) (interface{}, bool) {
 	if errproyecto == nil && errunidad == nil {
 		manejoProyectosGetOneId(proyectos, unidades, idUnidad)
 		return proyectos, true
 	} else {
-		helpers.ManejoError(alerta, alertas, "", errproyecto)
-		return *alerta, false
+		return errproyecto, false
 	}
 }
 
-func PeticionProyectosGetOneId(idStr string, alerta *models.Alert, alertas *[]interface{}) (interface{}, bool) {
+func PeticionProyectosGetOneId(idStr string) (APIResponseDTO requestresponse.APIResponse) {
 	// var idOikos float64
 	var idUnidad float64
 	var proyectos []map[string]interface{}
@@ -171,24 +171,35 @@ func PeticionProyectosGetOneId(idStr string, alerta *models.Alert, alertas *[]in
 	errunidad := request.GetJson("http://"+beego.AppConfig.String("CoreService")+"/unidad_tiempo/", &unidades)
 
 	if proyectos[0]["ProyectoAcademico"] != nil {
-		return validarProyecto(errproyecto, errunidad, &proyectos, unidades, idUnidad, alerta, alertas)
+		response, ok := validarProyecto(errproyecto, errunidad, &proyectos, unidades, idUnidad)
+		if ok {
+			APIResponseDTO = requestresponse.APIResponseDTO(true, 200, response)
+		} else {
+			APIResponseDTO = requestresponse.APIResponseDTO(false, 400, response)
+		}
 	} else {
-		return proyectos, false
+		APIResponseDTO = requestresponse.APIResponseDTO(false, 404, nil)
 	}
+	return APIResponseDTO
 }
 
 // FUNCIONES QUE SE USAN EN PUT INHABILITAR PROYECTO
 
-func InhabilitarProyecto(alerta *models.Alert, alertas *[]interface{}, idStr string, ProyectoAcademico map[string]interface{}) bool {
+func InhabilitarProyecto(idStr string, data []byte) (APIResponseDTO requestresponse.APIResponse) {
 	var resultadoProyecto map[string]interface{}
-	errProyecto := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/proyecto_academico_institucion/"+idStr, "PUT", &resultadoProyecto, ProyectoAcademico)
-	if resultadoProyecto["Type"] == "error" || errProyecto != nil || resultadoProyecto["Status"] == "404" || resultadoProyecto["Message"] != nil {
-		helpers.ManejoError(alerta, alertas, fmt.Sprintf("%v", resultadoProyecto))
-		return false
-	} else {
-		*alertas = append(*alertas, ProyectoAcademico)
-		return true
+	var proyectoAcademico map[string]interface{}
+	if err := json.Unmarshal(data, &proyectoAcademico); err == nil {
+
+		errProyecto := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/proyecto_academico_institucion/"+idStr, "PUT", &resultadoProyecto, proyectoAcademico)
+		if resultadoProyecto["Type"] == "error" || errProyecto != nil || resultadoProyecto["Status"] == "404" || resultadoProyecto["Message"] != nil {
+			APIResponseDTO = requestresponse.APIResponseDTO(false, 400, nil, errProyecto.Error())
+		} else {
+			APIResponseDTO = requestresponse.APIResponseDTO(true, 200, nil)
+		}
+	}else {
+		APIResponseDTO = requestresponse.APIResponseDTO(false, 400, nil, err.Error())
 	}
+	return APIResponseDTO
 }
 
 // FUNCIONES QUE SE USAN EN PUT GET ONE REGISTRO POR ID
@@ -209,16 +220,16 @@ func manejoRegistrosGetRegistroId(registros *[]map[string]interface{}) {
 	}
 }
 
-func PeticionRegistrosGetRegistroId(idStr string, alerta *models.Alert, alertas *[]interface{}) (interface{}, bool) {
+func PeticionRegistrosGetRegistroId(idStr string) (APIResponseDTO requestresponse.APIResponse) {
 	var registros []map[string]interface{}
 
 	errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/registro_calificado_acreditacion/?query=ProyectoAcademicoInstitucionId.Id:"+idStr, &registros)
 
 	if errproyecto == nil {
 		manejoRegistrosGetRegistroId(&registros)
-		return registros, true
-	} else {
-		helpers.ManejoError(alerta, alertas, "", errproyecto)
-		return *alerta, false
-	}
+		APIResponseDTO = requestresponse.APIResponseDTO(true, 200, registros)
+    } else {
+        APIResponseDTO = requestresponse.APIResponseDTO(false, 400, nil, errproyecto.Error())
+    }
+	return APIResponseDTO
 }
