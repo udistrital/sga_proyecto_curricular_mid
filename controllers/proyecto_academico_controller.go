@@ -6,16 +6,18 @@ import (
 	"github.com/udistrital/utils_oas/errorhandler"
 )
 
-type ConsultaProyectoAcademicoController struct {
+type ProyectoAcademicoController struct {
 	beego.Controller
 }
 
 // URLMapping ...
-func (c *ConsultaProyectoAcademicoController) URLMapping() {
+func (c *ProyectoAcademicoController) URLMapping() {
 	c.Mapping("GetAll", c.GetAll)
 	c.Mapping("GetOnePorId", c.GetOnePorId)
 	c.Mapping("Put", c.PutInhabilitarProyecto)
 	c.Mapping("GetOneRegistroPorId", c.GetOneRegistroPorId)
+	c.Mapping("PostProyecto", c.PostProyecto)
+	c.Mapping("PostCoordinadorById", c.PostCoordinadorById)
 }
 
 // GetAll ...
@@ -30,11 +32,11 @@ func (c *ConsultaProyectoAcademicoController) URLMapping() {
 // @Success 200 {object} models.ConsultaProyectoAcademico
 // @Failure 404 not found resource
 // @router / [get]
-func (c *ConsultaProyectoAcademicoController) GetAll() {
+func (c *ProyectoAcademicoController) GetAll() {
 	defer errorhandler.HandlePanic(&c.Controller)
 
 	respuesta := services.PeticionProyectos()
-	
+
 	c.Ctx.Output.SetStatus(respuesta.Status)
 	c.Data["json"] = respuesta
 	c.ServeJSON()
@@ -47,7 +49,7 @@ func (c *ConsultaProyectoAcademicoController) GetAll() {
 // @Success 200 {object} models.ConsultaProyectoAcademico
 // @Failure 404 not found resource
 // @router /:id [get]
-func (c *ConsultaProyectoAcademicoController) GetOnePorId() {
+func (c *ProyectoAcademicoController) GetOnePorId() {
 	defer errorhandler.HandlePanic(&c.Controller)
 
 	idStr := c.Ctx.Input.Param(":id")
@@ -65,8 +67,8 @@ func (c *ConsultaProyectoAcademicoController) GetOnePorId() {
 // @Param   body        body    {}  true        "body Inhabilitar Proyecto content"
 // @Success 200 {}
 // @Failure 400 the request contains incorrect syntax
-// @router /inhabilitar_proyecto/:id [put]
-func (c *ConsultaProyectoAcademicoController) PutInhabilitarProyecto() {
+// @router /:id/inhabilitar [put]
+func (c *ProyectoAcademicoController) PutInhabilitarProyecto() {
 	defer errorhandler.HandlePanic(&c.Controller)
 
 	idStr := c.Ctx.Input.Param(":id")
@@ -85,8 +87,8 @@ func (c *ConsultaProyectoAcademicoController) PutInhabilitarProyecto() {
 // @Param	id		path 	string	true		"The key for staticblock"
 // @Success 200 {object} models.ConsultaProyectoAcademico
 // @Failure 403 :id is empty
-// @router /get_registro/:id [get]
-func (c *ConsultaProyectoAcademicoController) GetOneRegistroPorId() {
+// @router /registro/:id [get]
+func (c *ProyectoAcademicoController) GetOneRegistroPorId() {
 	defer errorhandler.HandlePanic(&c.Controller)
 
 	idStr := c.Ctx.Input.Param(":id")
@@ -94,5 +96,44 @@ func (c *ConsultaProyectoAcademicoController) GetOneRegistroPorId() {
 	repuesta := services.PeticionRegistrosGetRegistroId(idStr)
 	c.Ctx.Output.SetStatus(repuesta.Status)
 	c.Data["json"] = repuesta
+	c.ServeJSON()
+}
+
+// PostProyecto ...
+// @Title PostProyecto
+// @Description Crear Proyecto
+// @Param   body        body    {}  true        "body Agregar Proyecto content"
+// @Success 200 {}
+// @Failure 403 body is empty
+// @router / [post]
+func (c *ProyectoAcademicoController) PostProyecto() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
+	data := c.Ctx.Input.RequestBody
+
+	respuesta := services.ManejoPeticionesProyecto(data)
+
+	c.Ctx.Output.SetStatus(respuesta.Status)
+	c.Data["json"] = respuesta
+	c.ServeJSON()
+}
+
+// PostCoordinadorById ...
+// @Title PostCoordinadorById
+// @Description Post a de un cordinador de un proyecto existente, cambia estado activo a false a los coordinadores anteriores y crea el nuevo
+// @Param	id		path 	string	true		"The key for staticblock"
+// @Param   body        body    {}  true        "body Agregar Registro content"
+// @Success 200 {object} models.ConsultaProyectoAcademico
+// @Failure 403 :id is empty
+// @router /coordinador [post]
+func (c *ProyectoAcademicoController) PostCoordinadorById() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
+	data := c.Ctx.Input.RequestBody
+
+	respuesta := services.CoordinaById(data)
+
+	c.Ctx.Output.SetStatus(respuesta.Status)
+	c.Data["json"] = respuesta
 	c.ServeJSON()
 }

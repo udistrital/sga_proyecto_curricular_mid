@@ -19,14 +19,9 @@ func init() {
 	beego.ErrorController(&errorhandler.ErrorHandlerController{})
 
 	ns := beego.NewNamespace("/v1",
-		beego.NSNamespace("/consulta_proyecto_academico",
+		beego.NSNamespace("/proyecto-academico",
 			beego.NSInclude(
-				&controllers.ConsultaProyectoAcademicoController{},
-			),
-		),
-		beego.NSNamespace("/proyecto_academico",
-			beego.NSInclude(
-				&controllers.CrearProyectoAcademicoController{},
+				&controllers.ProyectoAcademicoController{},
 			),
 		),
 	)

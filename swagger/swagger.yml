@@ -11,12 +11,12 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 basePath: /v1
 paths:
-  /consulta_proyecto_academico/:
+  /proyecto-academico/:
     get:
       tags:
-      - consulta_proyecto_academico
+      - proyecto-academico
       description: get ConsultaProyectoAcademico
-      operationId: ConsultaProyectoAcademicoController.GetAll
+      operationId: ProyectoAcademicoController.GetAll
       parameters:
       - in: query
         name: query
@@ -49,12 +49,29 @@ paths:
             $ref: '#/definitions/models.ConsultaProyectoAcademico'
         "404":
           description: not found resource
-  /consulta_proyecto_academico/{id}:
+    post:
+      tags:
+      - proyecto-academico
+      description: Crear Proyecto
+      operationId: ProyectoAcademicoController.PostProyecto
+      parameters:
+      - in: body
+        name: body
+        description: body Agregar Proyecto content
+        required: true
+        schema:
+          $ref: '#/definitions/{}'
+      responses:
+        "200":
+          description: '{}'
+        "403":
+          description: body is empty
+  /proyecto-academico/{id}:
     get:
       tags:
-      - consulta_proyecto_academico
+      - proyecto-academico
       description: get ConsultaProyectoAcademico by id
-      operationId: ConsultaProyectoAcademicoController.GetOnePorId
+      operationId: ProyectoAcademicoController.GetOnePorId
       parameters:
       - in: path
         name: id
@@ -68,31 +85,12 @@ paths:
             $ref: '#/definitions/models.ConsultaProyectoAcademico'
         "404":
           description: not found resource
-  /consulta_proyecto_academico/get_registro/{id}:
-    get:
-      tags:
-      - consulta_proyecto_academico
-      description: get ConsultaRegistro by id
-      operationId: ConsultaProyectoAcademicoController.GetOneRegistroPorId
-      parameters:
-      - in: path
-        name: id
-        description: The key for staticblock
-        required: true
-        type: string
-      responses:
-        "200":
-          description: ""
-          schema:
-            $ref: '#/definitions/models.ConsultaProyectoAcademico'
-        "403":
-          description: :id is empty
-  /consulta_proyecto_academico/inhabilitar_proyecto/{id}:
+  /proyecto-academico/{id}/inhabilitar:
     put:
       tags:
-      - consulta_proyecto_academico
+      - proyecto-academico
       description: Inhabilitar Proyecto
-      operationId: ConsultaProyectoAcademicoController.PutInhabilitarProyecto
+      operationId: ProyectoAcademicoController.PutInhabilitarProyecto
       parameters:
       - in: path
         name: id
@@ -110,30 +108,12 @@ paths:
           description: '{}'
         "400":
           description: the request contains incorrect syntax
-  /proyecto_academico/:
+  /proyecto-academico/coordinador:
     post:
       tags:
-      - proyecto_academico
-      description: Crear Proyecto
-      operationId: CrearProyectoAcademicoController.PostProyecto
-      parameters:
-      - in: body
-        name: body
-        description: body Agregar Proyecto content
-        required: true
-        schema:
-          $ref: '#/definitions/{}'
-      responses:
-        "200":
-          description: '{}'
-        "403":
-          description: body is empty
-  /proyecto_academico/coordinador:
-    post:
-      tags:
-      - proyecto_academico
+      - proyecto-academico
       description: Post a de un cordinador de un proyecto existente, cambia estado activo a false a los coordinadores anteriores y crea el nuevo
-      operationId: CrearProyectoAcademicoController.PostCoordinadorById
+      operationId: ProyectoAcademicoController.PostCoordinadorById
       parameters:
       - in: path
         name: id
@@ -146,6 +126,25 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/{}'
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.ConsultaProyectoAcademico'
+        "403":
+          description: :id is empty
+  /proyecto-academico/registro/{id}:
+    get:
+      tags:
+      - proyecto-academico
+      description: get ConsultaRegistro by id
+      operationId: ProyectoAcademicoController.GetOneRegistroPorId
+      parameters:
+      - in: path
+        name: id
+        description: The key for staticblock
+        required: true
+        type: string
       responses:
         "200":
           description: ""
