@@ -15,13 +15,13 @@
     },
     "basePath": "/v1",
     "paths": {
-        "/consulta_proyecto_academico/": {
+        "/proyecto-academico/": {
             "get": {
                 "tags": [
-                    "consulta_proyecto_academico"
+                    "proyecto-academico"
                 ],
                 "description": "get ConsultaProyectoAcademico",
-                "operationId": "ConsultaProyectoAcademicoController.GetAll",
+                "operationId": "ProyectoAcademicoController.GetAll",
                 "parameters": [
                     {
                         "in": "query",
@@ -67,112 +67,17 @@
                             "$ref": "#/definitions/models.ConsultaProyectoAcademico"
                         }
                     },
-                    "403": {
-                        "description": ""
+                    "404": {
+                        "description": "not found resource"
                     }
                 }
-            }
-        },
-        "/consulta_proyecto_academico/get_registro/{id}": {
-            "get": {
-                "tags": [
-                    "consulta_proyecto_academico"
-                ],
-                "description": "get ConsultaRegistro by id",
-                "operationId": "ConsultaProyectoAcademicoController.GetOneRegistroPorId",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "The key for staticblock",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/models.ConsultaProyectoAcademico"
-                        }
-                    },
-                    "403": {
-                        "description": ":id is empty"
-                    }
-                }
-            }
-        },
-        "/consulta_proyecto_academico/inhabilitar_proyecto/{id}": {
-            "put": {
-                "tags": [
-                    "consulta_proyecto_academico"
-                ],
-                "description": "Inhabilitar Proyecto",
-                "operationId": "ConsultaProyectoAcademicoController.PutInhabilitarProyecto",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "el id del proyecto a inhabilitar",
-                        "required": true,
-                        "type": "string"
-                    },
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "body Inhabilitar Proyecto content",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/{}"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{}"
-                    },
-                    "403": {
-                        "description": ":id is empty"
-                    }
-                }
-            }
-        },
-        "/consulta_proyecto_academico/{id}": {
-            "get": {
-                "tags": [
-                    "consulta_proyecto_academico"
-                ],
-                "description": "get ConsultaProyectoAcademico by id",
-                "operationId": "ConsultaProyectoAcademicoController.GetOnePorId",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "The key for staticblock",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "schema": {
-                            "$ref": "#/definitions/models.ConsultaProyectoAcademico"
-                        }
-                    },
-                    "403": {
-                        "description": ":id is empty"
-                    }
-                }
-            }
-        },
-        "/proyecto_academico/": {
+            },
             "post": {
                 "tags": [
-                    "proyecto_academico"
+                    "proyecto-academico"
                 ],
                 "description": "Crear Proyecto",
-                "operationId": "CrearProyectoAcademicoController.PostProyecto",
+                "operationId": "ProyectoAcademicoController.PostProyecto",
                 "parameters": [
                     {
                         "in": "body",
@@ -194,13 +99,13 @@
                 }
             }
         },
-        "/proyecto_academico/coordinador": {
+        "/proyecto-academico/coordinador": {
             "post": {
                 "tags": [
-                    "proyecto_academico"
+                    "proyecto-academico"
                 ],
                 "description": "Post a de un cordinador de un proyecto existente, cambia estado activo a false a los coordinadores anteriores y crea el nuevo",
-                "operationId": "CrearProyectoAcademicoController.PostCoordinadorById",
+                "operationId": "ProyectoAcademicoController.PostCoordinadorById",
                 "parameters": [
                     {
                         "in": "path",
@@ -228,6 +133,99 @@
                     },
                     "403": {
                         "description": ":id is empty"
+                    }
+                }
+            }
+        },
+        "/proyecto-academico/registro/{id}": {
+            "get": {
+                "tags": [
+                    "proyecto-academico"
+                ],
+                "description": "get ConsultaRegistro by id",
+                "operationId": "ProyectoAcademicoController.GetOneRegistroPorId",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "The key for staticblock",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.ConsultaProyectoAcademico"
+                        }
+                    },
+                    "403": {
+                        "description": ":id is empty"
+                    }
+                }
+            }
+        },
+        "/proyecto-academico/{id}": {
+            "get": {
+                "tags": [
+                    "proyecto-academico"
+                ],
+                "description": "get ConsultaProyectoAcademico by id",
+                "operationId": "ProyectoAcademicoController.GetOnePorId",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "The key for staticblock",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.ConsultaProyectoAcademico"
+                        }
+                    },
+                    "404": {
+                        "description": "not found resource"
+                    }
+                }
+            }
+        },
+        "/proyecto-academico/{id}/inhabilitar": {
+            "put": {
+                "tags": [
+                    "proyecto-academico"
+                ],
+                "description": "Inhabilitar Proyecto",
+                "operationId": "ProyectoAcademicoController.PutInhabilitarProyecto",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "el id del proyecto a inhabilitar",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body Inhabilitar Proyecto content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/{}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "400": {
+                        "description": "the request contains incorrect syntax"
                     }
                 }
             }
