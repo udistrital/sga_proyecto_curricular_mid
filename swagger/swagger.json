@@ -67,8 +67,8 @@
                             "$ref": "#/definitions/models.ConsultaProyectoAcademico"
                         }
                     },
-                    "403": {
-                        "description": ""
+                    "404": {
+                        "description": "not found resource"
                     }
                 }
             }
@@ -131,8 +131,8 @@
                     "200": {
                         "description": "{}"
                     },
-                    "403": {
-                        "description": ":id is empty"
+                    "400": {
+                        "description": "the request contains incorrect syntax"
                     }
                 }
             }
@@ -160,8 +160,8 @@
                             "$ref": "#/definitions/models.ConsultaProyectoAcademico"
                         }
                     },
-                    "403": {
-                        "description": ":id is empty"
+                    "404": {
+                        "description": "not found resource"
                     }
                 }
             }

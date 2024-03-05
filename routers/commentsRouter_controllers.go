@@ -7,7 +7,7 @@ import (
 
 func init() {
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_mid_proyecto_curricular/controllers:ConsultaProyectoAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_mid_proyecto_curricular/controllers:ConsultaProyectoAcademicoController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_proyecto_curricular_mid/controllers:ConsultaProyectoAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_proyecto_curricular_mid/controllers:ConsultaProyectoAcademicoController"],
         beego.ControllerComments{
             Method: "GetAll",
             Router: "/",
@@ -16,7 +16,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_mid_proyecto_curricular/controllers:ConsultaProyectoAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_mid_proyecto_curricular/controllers:ConsultaProyectoAcademicoController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_proyecto_curricular_mid/controllers:ConsultaProyectoAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_proyecto_curricular_mid/controllers:ConsultaProyectoAcademicoController"],
         beego.ControllerComments{
             Method: "GetOnePorId",
             Router: "/:id",
@@ -25,7 +25,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_mid_proyecto_curricular/controllers:ConsultaProyectoAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_mid_proyecto_curricular/controllers:ConsultaProyectoAcademicoController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_proyecto_curricular_mid/controllers:ConsultaProyectoAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_proyecto_curricular_mid/controllers:ConsultaProyectoAcademicoController"],
         beego.ControllerComments{
             Method: "GetOneRegistroPorId",
             Router: "/get_registro/:id",
@@ -34,7 +34,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_mid_proyecto_curricular/controllers:ConsultaProyectoAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_mid_proyecto_curricular/controllers:ConsultaProyectoAcademicoController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_proyecto_curricular_mid/controllers:ConsultaProyectoAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_proyecto_curricular_mid/controllers:ConsultaProyectoAcademicoController"],
         beego.ControllerComments{
             Method: "PutInhabilitarProyecto",
             Router: "/inhabilitar_proyecto/:id",
@@ -43,7 +43,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_mid_proyecto_curricular/controllers:CrearProyectoAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_mid_proyecto_curricular/controllers:CrearProyectoAcademicoController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_proyecto_curricular_mid/controllers:CrearProyectoAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_proyecto_curricular_mid/controllers:CrearProyectoAcademicoController"],
         beego.ControllerComments{
             Method: "PostProyecto",
             Router: "/",
@@ -52,7 +52,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_mid_proyecto_curricular/controllers:CrearProyectoAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_mid_proyecto_curricular/controllers:CrearProyectoAcademicoController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_proyecto_curricular_mid/controllers:CrearProyectoAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_proyecto_curricular_mid/controllers:CrearProyectoAcademicoController"],
         beego.ControllerComments{
             Method: "PostCoordinadorById",
             Router: "/coordinador",
