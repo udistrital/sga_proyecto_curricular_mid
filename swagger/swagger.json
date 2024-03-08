@@ -166,6 +166,34 @@
                 }
             }
         },
+        "/proyecto-academico/registros-calificados/": {
+            "post": {
+                "tags": [
+                    "proyecto-academico"
+                ],
+                "description": "Post a de un registro de un proyecto existente, cambia estado activo a false a los registro anteriores y crea el nuevo",
+                "operationId": "ProyectoAcademicoController.PostRegistroCalificadoById",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body Agregar Registro content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/{}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.ConsultaProyectoAcademico"
+                        }
+                    }
+                }
+            }
+        },
         "/proyecto-academico/{id}": {
             "get": {
                 "tags": [
@@ -226,6 +254,44 @@
                     },
                     "400": {
                         "description": "the request contains incorrect syntax"
+                    }
+                }
+            }
+        },
+        "/proyecto-academico/{id}/registros-alta-calidad/": {
+            "post": {
+                "tags": [
+                    "proyecto-academico"
+                ],
+                "description": "Post a de un registro de un proyecto existente, cambia estado activo a false a los registro anteriores y crea el nuevo",
+                "operationId": "ProyectoAcademicoController.PostRegistroAltaCalidadById",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "The key for staticblock",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body Agregar Registro content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/{}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.ConsultaProyectoAcademico"
+                        }
+                    },
+                    "403": {
+                        "description": ":id is empty"
                     }
                 }
             }

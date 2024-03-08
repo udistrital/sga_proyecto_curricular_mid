@@ -137,3 +137,34 @@ func (c *ProyectoAcademicoController) PostCoordinadorById() {
 	c.Data["json"] = respuesta
 	c.ServeJSON()
 }
+
+// PostRegistroCalificadoById ...
+// @Title PostRegistroCalificadoById
+// @Description Post a de un registro de un proyecto existente, cambia estado activo a false a los registro anteriores y crea el nuevo
+// @Param   body        body    {}  true        "body Agregar Registro content"
+// @Success 200 {object} models.ConsultaProyectoAcademico
+// @router /registros-calificados/ [post]
+func (c *ProyectoAcademicoController) PostRegistroCalificadoById() {
+	dataBody := c.Ctx.Input.RequestBody
+	resultado := services.PostRegistroCalificadoById(dataBody)
+	c.Data["json"] = resultado
+	c.Ctx.Output.SetStatus(resultado.Status)
+	c.ServeJSON()
+}
+
+// PostRegistroAltaCalidadById ...
+// @Title PostRegistroAltaCalidadById
+// @Description Post a de un registro de un proyecto existente, cambia estado activo a false a los registro anteriores y crea el nuevo
+// @Param	id		path 	string	true		"The key for staticblock"
+// @Param   body        body    {}  true        "body Agregar Registro content"
+// @Success 200 {object} models.ConsultaProyectoAcademico
+// @Failure 403 :id is empty
+// @router /:id/registros-alta-calidad/ [post]
+func (c *ProyectoAcademicoController) PostRegistroAltaCalidadById() {
+	id := c.Ctx.Input.Param(":id")
+	dataBody := c.Ctx.Input.RequestBody
+	resultado := services.PostRegistroAltaCalidadById(id, dataBody)
+	c.Data["json"] = resultado
+	c.Ctx.Output.SetStatus(resultado.Status)
+	c.ServeJSON()
+}
