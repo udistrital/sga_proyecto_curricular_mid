@@ -25,9 +25,9 @@ func ManejoPeticionesProyecto(data []byte) (APIResponseDTO requestresponse.APIRe
 			"Titulaciones":                 (*Proyecto_academico)["Titulaciones"],
 		}
 
-		Proyecto_academico_oikosPost := (*Proyecto_academico)["Oikos"]
+		//Proyecto_academico_oikosPost := (*Proyecto_academico)["Oikos"]
 
-		var resultadoOikos map[string]interface{}
+		//var resultadoOikos map[string]interface{}
 		var resultadoProyecto map[string]interface{}
 
 		if !peticionOikos(&resultadoOikos, Proyecto_academico_oikosPost, Proyecto_academico, &Proyecto_academicoPost) {
@@ -206,7 +206,7 @@ func asignarProyectoAcademico(Proyecto_academico *map[string]interface{}, result
 	(*Proyecto_academicoPost)["ProyectoAcademicoInstitucion"].(map[string]interface{})["DependenciaId"] = idDependenciaProyecto
 }
 
-func peticionOikos(resultadoOikos *map[string]interface{}, Proyecto_academico_oikosPost interface{}, Proyecto_academico *map[string]interface{}, Proyecto_academicoPost *map[string]interface{}) bool {
+/* func peticionOikos(resultadoOikos *map[string]interface{}, Proyecto_academico_oikosPost interface{}, Proyecto_academico *map[string]interface{}, Proyecto_academicoPost *map[string]interface{}) bool {
 	errOikos := request.SendJson("http://"+beego.AppConfig.String("OikosService")+"/dependencia_padre/tr_dependencia_padre", "POST", resultadoOikos, Proyecto_academico_oikosPost)
 	if (*resultadoOikos)["Type"] == "error" || errOikos != nil || (*resultadoOikos)["Status"] == "404" || (*resultadoOikos)["Message"] != nil {
 
@@ -215,7 +215,7 @@ func peticionOikos(resultadoOikos *map[string]interface{}, Proyecto_academico_oi
 		asignarProyectoAcademico(Proyecto_academico, *resultadoOikos, Proyecto_academicoPost)
 		return true
 	}
-}
+} */
 
 func peticionProyecto(resultadoProyecto *map[string]interface{}, Proyecto_academicoPost map[string]interface{}, Proyecto_academico map[string]interface{}) bool {
 	errProyecto := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico", "POST", resultadoProyecto, Proyecto_academicoPost)
