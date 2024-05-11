@@ -30,10 +30,10 @@ func ManejoPeticionesProyecto(data []byte) (APIResponseDTO requestresponse.APIRe
 		//var resultadoOikos map[string]interface{}
 		var resultadoProyecto map[string]interface{}
 
-		if !peticionOikos(&resultadoOikos, Proyecto_academico_oikosPost, Proyecto_academico, &Proyecto_academicoPost) {
+		/* 		if !peticionOikos(&resultadoOikos, Proyecto_academico_oikosPost, Proyecto_academico, &Proyecto_academicoPost) {
 			APIResponseDTO = requestresponse.APIResponseDTO(false, 400, nil)
 			return APIResponseDTO
-		}
+		} */
 
 		if !peticionProyecto(&resultadoProyecto, Proyecto_academicoPost, *Proyecto_academico) {
 			APIResponseDTO = requestresponse.APIResponseDTO(false, 400, nil)
