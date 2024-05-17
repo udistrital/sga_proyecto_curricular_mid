@@ -218,7 +218,7 @@ func asignarProyectoAcademico(Proyecto_academico *map[string]interface{}, result
 } */
 
 func peticionProyecto(resultadoProyecto *map[string]interface{}, Proyecto_academicoPost map[string]interface{}, Proyecto_academico map[string]interface{}) bool {
-	errProyecto := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico", "POST", resultadoProyecto, Proyecto_academicoPost)
+	errProyecto := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico", "POST", &resultadoProyecto, Proyecto_academicoPost)
 	if (*resultadoProyecto)["Type"] == "error" || errProyecto != nil || (*resultadoProyecto)["Status"] == "404" || (*resultadoProyecto)["Message"] != nil {
 
 		return false
