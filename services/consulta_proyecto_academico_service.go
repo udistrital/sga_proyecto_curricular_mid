@@ -165,13 +165,13 @@ func PeticionProyectosGetOneId(idStr string) (APIResponseDTO requestresponse.API
 	var idUnidad float64
 	var proyectos []map[string]interface{}
 	// var dependencias []map[string]interface{}
-	var unidades []map[string]interface{}
+	var unidades map[string]interface{}
 
 	errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico/"+idStr, &proyectos)
-	errunidad := request.GetJson("http://"+beego.AppConfig.String("ParametroService")+"/unidad_tiempo/", &unidades)
+	errunidad := request.GetJson("http://"+beego.AppConfig.String("ParametroService")+"parametro?query=TipoParametroId:7&limit=0", &unidades)
 
 	if proyectos[0]["ProyectoAcademico"] != nil {
-		response, ok := validarProyecto(errproyecto, errunidad, &proyectos, unidades, idUnidad)
+		response, ok := validarProyecto(errproyecto, errunidad, &proyectos, unidades["Data"].([]map[string]interface{}), idUnidad)
 		if ok {
 			APIResponseDTO = requestresponse.APIResponseDTO(true, 200, response)
 		} else {
