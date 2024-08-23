@@ -2,7 +2,9 @@ package services
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -17,29 +19,22 @@ func ManejoPeticionesProyecto(data []byte) (APIResponseDTO requestresponse.APIRe
 	var Proyecto_academico *map[string]interface{}
 
 	if err := json.Unmarshal(data, &Proyecto_academico); err == nil {
-		Proyecto_academicoPost := make(map[string]interface{})
-		Proyecto_academicoPost = map[string]interface{}{
+
+		Proyecto_academicoPost := map[string]interface{}{
 			"ProyectoAcademicoInstitucion": (*Proyecto_academico)["ProyectoAcademicoInstitucion"],
 			"Enfasis":                      (*Proyecto_academico)["Enfasis"],
 			"Registro":                     (*Proyecto_academico)["Registro"],
 			"Titulaciones":                 (*Proyecto_academico)["Titulaciones"],
 		}
 
-		//Proyecto_academico_oikosPost := (*Proyecto_academico)["Oikos"]
-
-		//var resultadoOikos map[string]interface{}
 		var resultadoProyecto map[string]interface{}
 
-		/* 		if !peticionOikos(&resultadoOikos, Proyecto_academico_oikosPost, Proyecto_academico, &Proyecto_academicoPost) {
-			APIResponseDTO = requestresponse.APIResponseDTO(false, 400, nil)
-			return APIResponseDTO
-		} */
-
-		if !peticionProyecto(&resultadoProyecto, Proyecto_academicoPost, *Proyecto_academico) {
-			APIResponseDTO = requestresponse.APIResponseDTO(false, 400, nil)
+		if err := peticionProyecto(&resultadoProyecto, Proyecto_academicoPost); err != nil {
+			log.Println(err)
+			APIResponseDTO = requestresponse.APIResponseDTO(false, 400, nil, fmt.Sprintf("%v", err))
 			return APIResponseDTO
 		}
-		APIResponseDTO = requestresponse.APIResponseDTO(true, 200, nil)
+		APIResponseDTO = requestresponse.APIResponseDTO(true, 200, nil, "Proyecto creado con éxito")
 		return APIResponseDTO
 	} else {
 		APIResponseDTO = requestresponse.APIResponseDTO(false, 400, nil, err.Error())
@@ -217,14 +212,12 @@ func asignarProyectoAcademico(Proyecto_academico *map[string]interface{}, result
 	}
 } */
 
-func peticionProyecto(resultadoProyecto *map[string]interface{}, Proyecto_academicoPost map[string]interface{}, Proyecto_academico map[string]interface{}) bool {
+func peticionProyecto(resultadoProyecto *map[string]interface{}, Proyecto_academicoPost map[string]interface{}) error {
 	errProyecto := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico", "POST", &resultadoProyecto, Proyecto_academicoPost)
 	if (*resultadoProyecto)["Type"] == "error" || errProyecto != nil || (*resultadoProyecto)["Status"] == "404" || (*resultadoProyecto)["Message"] != nil {
-
-		return false
-	} else {
-		return true
+		return errors.New((*resultadoProyecto)["Message"].(string),)
 	}
+	return nil
 }
 
 // FUNCIONES QUE SE USAN EN PUT GET ONE POST COORDINADOR BY ID
