@@ -151,7 +151,7 @@ func manejoProyectosGetOneId(proyectos *[]map[string]interface{}, unidades []map
 	}
 }
 
-func validarProyecto(errproyecto error, errunidad interface{}, proyectos *[]map[string]interface{}, unidades []map[string]interface{}, idUnidad float64) (interface{}, bool) {
+func validarProyecto(errproyecto error, errunidad error, proyectos *[]map[string]interface{}, unidades []map[string]interface{}, idUnidad float64) (interface{}, bool) {
 	if errproyecto == nil && errunidad == nil {
 		manejoProyectosGetOneId(proyectos, unidades, idUnidad)
 		return proyectos, true
@@ -165,13 +165,22 @@ func PeticionProyectosGetOneId(idStr string) (APIResponseDTO requestresponse.API
 	var idUnidad float64
 	var proyectos []map[string]interface{}
 	// var dependencias []map[string]interface{}
-	var unidades map[string]interface{}
+	var unidadesResponse map[string]interface{}
+	var unidades []map[string]interface{}
 
 	errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico/"+idStr, &proyectos)
-	errunidad := request.GetJson("http://"+beego.AppConfig.String("ParametroService")+"parametro?query=TipoParametroId:7&limit=0", &unidades)
+	errunidad := request.GetJson("http://"+beego.AppConfig.String("ParametroService")+"parametro?query=TipoParametroId:7&limit=0", &unidadesResponse)
 
-	if proyectos[0]["ProyectoAcademico"] != nil {
-		response, ok := validarProyecto(errproyecto, errunidad, &proyectos, unidades["Data"].([]map[string]interface{}), idUnidad)
+	if errunidad == nil && unidadesResponse["Data"] != nil {
+		dataUnidades := unidadesResponse["Data"].([]interface{})
+		for _, unidad := range dataUnidades {
+			unidadTem := unidad.(map[string]interface{})
+			unidades = append(unidades, unidadTem)
+		}
+	}
+	
+	if proyectos[0]["ProyectoAcademico"] != nil && unidadesResponse["Data"] != nil {
+		response, ok := validarProyecto(errproyecto, errunidad, &proyectos, unidades, idUnidad)
 		if ok {
 			APIResponseDTO = requestresponse.APIResponseDTO(true, 200, response)
 		} else {
