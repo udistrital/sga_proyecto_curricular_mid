@@ -17,9 +17,14 @@ func PeticionProyectos() (APIResponseDTO requestresponse.APIResponse) {
 	errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico/", &proyectos)
 
 	if errproyecto == nil {
-		manejoProyectosGetAll(&proyectos)
-		APIResponseDTO = requestresponse.APIResponseDTO(true, 200, proyectos)
-		return APIResponseDTO
+		if len(proyectos) > 0 {
+			if len(proyectos[0]) > 0 {
+				manejoProyectosGetAll(&proyectos)
+				return requestresponse.APIResponseDTO(true, 200, proyectos)
+			}
+		}
+		// Si no hay proyectos o el primer proyecto está vacío
+		return requestresponse.APIResponseDTO(true, 204, nil, "No se encontraron proyectos")
 	} else {
 		APIResponseDTO = requestresponse.APIResponseDTO(false, 400, nil, errproyecto.Error())
 		return APIResponseDTO
@@ -178,7 +183,7 @@ func PeticionProyectosGetOneId(idStr string) (APIResponseDTO requestresponse.API
 			unidades = append(unidades, unidadTem)
 		}
 	}
-	
+
 	if proyectos[0]["ProyectoAcademico"] != nil && unidadesResponse["Data"] != nil {
 		response, ok := validarProyecto(errproyecto, errunidad, &proyectos, unidades, idUnidad)
 		if ok {
@@ -205,7 +210,7 @@ func InhabilitarProyecto(idStr string, data []byte) (APIResponseDTO requestrespo
 		} else {
 			APIResponseDTO = requestresponse.APIResponseDTO(true, 200, nil)
 		}
-	}else {
+	} else {
 		APIResponseDTO = requestresponse.APIResponseDTO(false, 400, nil, err.Error())
 	}
 	return APIResponseDTO
@@ -237,8 +242,8 @@ func PeticionRegistrosGetRegistroId(idStr string) (APIResponseDTO requestrespons
 	if errproyecto == nil {
 		manejoRegistrosGetRegistroId(&registros)
 		APIResponseDTO = requestresponse.APIResponseDTO(true, 200, registros)
-    } else {
-        APIResponseDTO = requestresponse.APIResponseDTO(false, 400, nil, errproyecto.Error())
-    }
+	} else {
+		APIResponseDTO = requestresponse.APIResponseDTO(false, 400, nil, errproyecto.Error())
+	}
 	return APIResponseDTO
 }
