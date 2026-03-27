@@ -14,7 +14,7 @@ import (
 
 func PeticionProyectos() (APIResponseDTO requestresponse.APIResponse) {
 	var proyectos []map[string]interface{}
-	errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico/", &proyectos)
+	errproyecto := request.GetJson(beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico/", &proyectos)
 
 	if errproyecto == nil {
 		if len(proyectos) > 0 {
@@ -40,7 +40,7 @@ func manejoProyectosGetAll(proyectos *[]map[string]interface{}) {
 
 		// Información de la facultad
 		var dependencia map[string]interface{}
-		errdependencia := request.GetJson("http://"+beego.AppConfig.String("OikosService")+"/dependencia/"+fmt.Sprintf("%.f", proyectobase["FacultadId"].(float64)), &dependencia)
+		errdependencia := request.GetJson(beego.AppConfig.String("OikosService")+"/dependencia/"+fmt.Sprintf("%.f", proyectobase["FacultadId"].(float64)), &dependencia)
 		if errdependencia == nil {
 			proyecto["NombreFacultad"] = dependencia["Nombre"]
 		}
@@ -119,7 +119,7 @@ func asignarInfoProyectoGetOneId(proyecto *map[string]interface{}, proyectobase 
 
 	// Información de la facultad
 	var dependenciaFacultad map[string]interface{}
-	errdependenciaFacultad := request.GetJson("http://"+beego.AppConfig.String("OikosService")+"/dependencia/"+fmt.Sprintf("%.f", (*proyectobase)["FacultadId"].(float64)), &dependenciaFacultad)
+	errdependenciaFacultad := request.GetJson(beego.AppConfig.String("OikosService")+"/dependencia/"+fmt.Sprintf("%.f", (*proyectobase)["FacultadId"].(float64)), &dependenciaFacultad)
 	// if errdependencia["Type"] == "error" || errdependencia != nil || dependencia["Status"] == "404" || dependencia["Message"] != nil {
 	if errdependenciaFacultad == nil {
 		(*proyecto)["NombreFacultad"] = dependenciaFacultad["Nombre"]
@@ -128,7 +128,7 @@ func asignarInfoProyectoGetOneId(proyecto *map[string]interface{}, proyectobase 
 
 	// Información de la dependencia del proyecto
 	var dependencia map[string]interface{}
-	errdependencia := request.GetJson("http://"+beego.AppConfig.String("OikosService")+"/dependencia/"+fmt.Sprintf("%.f", (*proyectobase)["DependenciaId"].(float64)), &dependencia)
+	errdependencia := request.GetJson(beego.AppConfig.String("OikosService")+"/dependencia/"+fmt.Sprintf("%.f", (*proyectobase)["DependenciaId"].(float64)), &dependencia)
 	// if errdependencia["Type"] == "error" || errdependencia != nil || dependencia["Status"] == "404" || dependencia["Message"] != nil {
 	if errdependencia == nil {
 		(*proyecto)["TelefonoDependencia"] = dependencia["TelefonoDependencia"]
@@ -173,8 +173,8 @@ func PeticionProyectosGetOneId(idStr string) (APIResponseDTO requestresponse.API
 	var unidadesResponse map[string]interface{}
 	var unidades []map[string]interface{}
 
-	errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico/"+idStr, &proyectos)
-	errunidad := request.GetJson("http://"+beego.AppConfig.String("ParametroService")+"parametro?query=TipoParametroId:7&limit=0", &unidadesResponse)
+	errproyecto := request.GetJson(beego.AppConfig.String("ProyectoAcademicoService")+"/tr_proyecto_academico/"+idStr, &proyectos)
+	errunidad := request.GetJson(beego.AppConfig.String("ParametroService")+"parametro?query=TipoParametroId:7&limit=0", &unidadesResponse)
 
 	if errunidad == nil && unidadesResponse["Data"] != nil {
 		dataUnidades := unidadesResponse["Data"].([]interface{})
@@ -204,7 +204,7 @@ func InhabilitarProyecto(idStr string, data []byte) (APIResponseDTO requestrespo
 	var proyectoAcademico map[string]interface{}
 	if err := json.Unmarshal(data, &proyectoAcademico); err == nil {
 
-		errProyecto := request.SendJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/proyecto_academico_institucion/"+idStr, "PUT", &resultadoProyecto, proyectoAcademico)
+		errProyecto := request.SendJson(beego.AppConfig.String("ProyectoAcademicoService")+"/proyecto_academico_institucion/"+idStr, "PUT", &resultadoProyecto, proyectoAcademico)
 		if resultadoProyecto["Type"] == "error" || errProyecto != nil || resultadoProyecto["Status"] == "404" || resultadoProyecto["Message"] != nil {
 			APIResponseDTO = requestresponse.APIResponseDTO(false, 400, nil, errProyecto.Error())
 		} else {
@@ -237,7 +237,7 @@ func manejoRegistrosGetRegistroId(registros *[]map[string]interface{}) {
 func PeticionRegistrosGetRegistroId(idStr string) (APIResponseDTO requestresponse.APIResponse) {
 	var registros []map[string]interface{}
 
-	errproyecto := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"/registro_calificado_acreditacion/?query=ProyectoAcademicoInstitucionId.Id:"+idStr, &registros)
+	errproyecto := request.GetJson(beego.AppConfig.String("ProyectoAcademicoService")+"/registro_calificado_acreditacion/?query=ProyectoAcademicoInstitucionId.Id:"+idStr, &registros)
 
 	if errproyecto == nil {
 		manejoRegistrosGetRegistroId(&registros)
